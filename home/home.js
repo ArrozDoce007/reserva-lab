@@ -277,212 +277,211 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function setupReservationForm() {
-        const form = document.getElementById('labReservationForm');
-        const modal = document.getElementById('confirmationModal');
-        const closeModalButton = document.getElementById('closeModal');
-        const reserveButton = document.getElementById('reserveButton');
-        const reservationFormContainer = document.getElementById('reservationForm');
-        const dateInput = document.getElementById('date');
-        const timeInput = document.getElementById('time');
-        const timeFimInput = document.getElementById('time_fim');
+    const form = document.getElementById('labReservationForm');
+    const modal = document.getElementById('confirmationModal');
+    const closeModalButton = document.getElementById('closeModal');
+    const reserveButton = document.getElementById('reserveButton');
+    const reservationFormContainer = document.getElementById('reservationForm');
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    const timeFimInput = document.getElementById('time_fim');
 
-        // Função para buscar a data e hora de Brasília de uma API
-        async function fetchBrasiliaTime() {
-            try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia'); // Altere o URL se necessário
-                const data = await response.json();
-                const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
-                const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
-                const currentTime = currentDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
-        
-                dateInput.min = today;
-                timeInput.min = currentTime; // Define a hora mínima para o horário de início
-                timeFimInput.min = currentTime; // Define a hora mínima para o horário de término
-        
-                // Remove o valor predefinido dos campos de horário
-                timeInput.value = '';
-                timeFimInput.value = '';
-        
-                // Adiciona event listeners para atualizar o horário de término e validar
-                dateInput.addEventListener('change', updateDate);
-                timeInput.addEventListener('change', updateTimeFimMin);
-                timeFimInput.addEventListener('change', validateTimeFim);
-        
-            } catch (error) {
-                console.error('Erro ao buscar a hora de Brasília:', error);
-                alert('Erro ao obter a data e hora atual. Por favor, tente novamente.');
-            }
+    // Função para buscar a data e hora de Brasília de uma API
+    async function fetchBrasiliaTime() {
+        try {
+            const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia'); // Altere o URL se necessário
+            const data = await response.json();
+            const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
+            const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
+            const currentTime = currentDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
+    
+            dateInput.min = today;
+            timeInput.min = currentTime; // Define a hora mínima para o horário de início
+            timeFimInput.min = currentTime; // Define a hora mínima para o horário de término
+    
+            // Remove o valor predefinido dos campos de horário
+            timeInput.value = '';
+            timeFimInput.value = '';
+    
+            // Adiciona event listeners para atualizar o horário de término e validar
+            dateInput.addEventListener('change', updateDate);
+            timeInput.addEventListener('change', updateTimeFimMin);
+            timeFimInput.addEventListener('change', validateTimeFim);
+    
+        } catch (error) {
+            console.error('Erro ao buscar a hora de Brasília:', error);
+            alert('Erro ao obter a data e hora atual. Por favor, tente novamente.');
+        }
+    }
+
+    // Função para atualizar o valor mínimo do horário de término baseado na data e no horário de início
+    function updateTimeFimMin() {
+        const startTime = timeInput.value;
+        const selectedDate = dateInput.value;
+        const now = new Date();
+        const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+        const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+
+        if (selectedDate === currentDate) {
+            timeInput.min = currentTime;
+        } else {
+            timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
         }
 
-        // Função para atualizar o valor mínimo do horário de término baseado na data e no horário de início
-        function updateTimeFimMin() {
-            const startTime = timeInput.value;
-            const selectedDate = dateInput.value;
-            const now = new Date();
-            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
-            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+        if (startTime) {
+            timeFimInput.min = startTime;
+        }
 
-            if (selectedDate === currentDate) {
-                timeInput.min = currentTime;
+        // Valida o horário de término quando o horário de início é alterado
+        validateTimeFim();
+    }
+
+    // Função para validar o horário de término
+    function validateTimeFim() {
+        const startTime = timeInput.value;
+        const endTime = timeFimInput.value;
+        const selectedDate = dateInput.value;
+
+        if (startTime && endTime) {
+            // Converte os horários para objetos Date para facilitar a comparação
+            const start = new Date(`${selectedDate}T${startTime}:00`);
+            const end = new Date(`${selectedDate}T${endTime}:00`);
+
+            // Calcula a diferença em horas
+            const timeDifference = (end - start) / (1000 * 60 * 60);
+
+            if (end < start) {
+                alert('O horário de término não pode ser anterior ao horário de início.');
+                timeFimInput.value = startTime;
+            } else if (timeDifference < 1) {
+                alert('A duração mínima da reserva deve ser de 1 hora.');
+                // Define o horário de término para 1 hora após o horário de início
+                const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
+                timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
+            }
+        }
+    }
+
+    // Função para atualizar a hora mínima com base na data selecionada
+    function updateDate() {
+        const selectedDate = dateInput.value;
+        const now = new Date();
+        const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+        const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+
+        if (selectedDate === currentDate) {
+            timeInput.min = currentTime;
+        } else {
+            timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
+        }
+
+        // Atualiza a hora mínima do campo de término quando a data é alterada
+        updateTimeFimMin();
+    }
+
+    // Chama a função para buscar a data e hora de Brasília
+    fetchBrasiliaTime();
+
+    // Adiciona um listener para o botão de fechar o modal
+    closeModalButton.addEventListener('click', function () {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex', 'items-center', 'justify-center');
+        form.reset();
+        reserveButton.textContent = 'Reservar';
+        reserveButton.classList.remove('bg-green-500');
+        reserveButton.classList.add('bg-blue-500');
+
+        // Esconde o formulário de reserva
+        reservationFormContainer.classList.add('hidden');
+        
+        // Volta ao topo da página
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Verifica se o usuário está logado
+        const userName = localStorage.getItem('userName');
+        const userMatricula = localStorage.getItem('userMatricula');
+
+        if (!userName || !userMatricula) {
+            // Armazena uma mensagem temporária e redireciona para a página de login
+            localStorage.setItem('loginMessage', 'Por favor, faça o login para continuar.');
+            window.location.href = '../index.html'; // URL da sua página de login
+            return;
+        }
+
+        const data = {
+            labName: document.getElementById("labName").textContent,
+            date: document.getElementById("date").value,
+            time: document.getElementById("time").value,
+            time_fim: document.getElementById("time_fim").value, // Inclui o horário de término
+            purpose: document.getElementById("purpose").value,
+            userName: userName,         // Inclui o nome do usuário
+            userMatricula: userMatricula // Inclui a matrícula do usuário
+        };
+
+        // Inicia a animação de processamento
+        reserveButton.classList.add('animate-bounce');
+        reserveButton.textContent = 'Processando...';
+
+        // Simula um processo de carregamento
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            reserveButton.textContent = `Processando... ${progress}%`;
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                reserveButton.classList.remove('animate-bounce');
+                reserveButton.textContent = 'Concluído!';
+                reserveButton.classList.add('bg-green-500');
+
+                // Mostra o modal de confirmação com um pequeno atraso
+                setTimeout(() => {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex', 'items-center', 'justify-center');
+                }, 500);
+            }
+        }, 200);
+
+        // Envia os dados para o backend
+        try {
+            const response = await fetch("https://api-reserva-lab.vercel.app/reserve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                // Se a resposta foi bem-sucedida
+                reserveButton.textContent = 'Reservado com sucesso!';
+                reserveButton.classList.add('bg-green-500');
             } else {
-                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
-            }
-
-            if (startTime) {
-                timeFimInput.min = startTime;
-            }
-
-            // Valida o horário de término quando o horário de início é alterado
-            validateTimeFim();
-        }
-
-        // Função para validar o horário de término
-        function validateTimeFim() {
-            const startTime = timeInput.value;
-            const endTime = timeFimInput.value;
-            const selectedDate = dateInput.value;
-
-            if (startTime && endTime) {
-                // Converte os horários para objetos Date para facilitar a comparação
-                const start = new Date(`${selectedDate}T${startTime}:00`);
-                const end = new Date(`${selectedDate}T${endTime}:00`);
-
-                // Calcula a diferença em horas
-                const timeDifference = (end - start) / (1000 * 60 * 60);
-
-                if (end < start) {
-                    alert('O horário de término não pode ser anterior ao horário de início.');
-                    timeFimInput.value = startTime;
-                } else if (timeDifference < 1) {
-                    alert('A duração mínima da reserva deve ser de 1 hora.');
-                    // Define o horário de término para 1 hora após o horário de início
-                    const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
-                    timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
-                }
-            }
-        }
-
-        // Função para atualizar a hora mínima com base na data selecionada
-        function updateDate() {
-            const selectedDate = dateInput.value;
-            const now = new Date();
-            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
-            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
-
-            if (selectedDate === currentDate) {
-                timeInput.min = currentTime;
-            } else {
-                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
-            }
-
-            // Atualiza a hora mínima do campo de término quando a data é alterada
-            updateTimeFimMin();
-        }
-
-        // Chama a função para buscar a data e hora de Brasília
-        fetchBrasiliaTime();
-
-        // Adiciona um listener para o botão de fechar o modal
-        closeModalButton.addEventListener('click', function () {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex', 'items-center', 'justify-center');
-            form.reset();
-            reserveButton.textContent = 'Reservar';
-            reserveButton.classList.remove('bg-green-500');
-            reserveButton.classList.add('bg-blue-500');
-
-            // Esconde o formulário de reserva
-            reservationFormContainer.classList.add('hidden');
-        });
-
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            // Verifica se o usuário está logado
-            const userName = localStorage.getItem('userName');
-            const userMatricula = localStorage.getItem('userMatricula');
-
-            if (!userName || !userMatricula) {
-                // Armazena uma mensagem temporária e redireciona para a página de login
-                localStorage.setItem('loginMessage', 'Por favor, faça o login para continuar.');
-                window.location.href = '../index.html'; // URL da sua página de login
-                return;
-            }
-
-            const data = {
-                labName: document.getElementById("labName").textContent,
-                date: document.getElementById("date").value,
-                time: document.getElementById("time").value,
-                time_fim: document.getElementById("time_fim").value, // Inclui o horário de término
-                purpose: document.getElementById("purpose").value,
-                userName: userName,         // Inclui o nome do usuário
-                userMatricula: userMatricula // Inclui a matrícula do usuário
-            };
-
-            // Inicia a animação de processamento
-            reserveButton.classList.add('animate-bounce');
-            reserveButton.textContent = 'Processando...';
-
-            // Simula um processo de carregamento
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                reserveButton.textContent = `Processando... ${progress}%`;
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    reserveButton.classList.remove('animate-bounce');
-                    reserveButton.textContent = 'Concluído!';
-                    reserveButton.classList.add('bg-green-500');
-
-                    // Mostra o modal de confirmação com um pequeno atraso
-                    setTimeout(() => {
-                        modal.classList.remove('hidden');
-                        modal.classList.add('flex', 'items-center', 'justify-center');
-                    }, 500);
-                }
-            }, 200);
-
-            // Envia os dados para o backend
-            try {
-                const response = await fetch("https://api-reserva-lab.vercel.app/reserve", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    // Se a resposta foi bem-sucedida
-                    reserveButton.textContent = 'Reservado com sucesso!';
-                    reserveButton.classList.add('bg-green-500');
-                } else {
-                    // Se a resposta não foi bem-sucedida, tenta obter a mensagem de erro
-                    const result = await response.json();
-                    const errorMessage = result.error || "Erro ao processar a reserva.";
-                    alert(errorMessage);
-
-                    // Restora o estado do botão
-                    reserveButton.textContent = 'Reservar';
-                    reserveButton.classList.remove('bg-green-500');
-                    reserveButton.classList.add('bg-blue-500');
-                }
-            } catch (error) {
-                console.error("Erro ao enviar a reserva:", error);
-                alert("Erro ao processar a reserva.");
+                // Se a resposta não foi bem-sucedida, tenta obter a mensagem de erro
+                const result = await response.json();
+                const errorMessage = result.error || "Erro ao processar a reserva.";
+                alert(errorMessage);
 
                 // Restora o estado do botão
                 reserveButton.textContent = 'Reservar';
                 reserveButton.classList.remove('bg-green-500');
                 reserveButton.classList.add('bg-blue-500');
             }
-        });
-    }
+        } catch (error) {
+            console.error("Erro ao enviar a reserva:", error);
+            alert("Erro ao processar a reserva.");
 
-    document.addEventListener("DOMContentLoaded", function () {
-        fetchAndRenderRequests();
+            // Restora o estado do botão
+            reserveButton.textContent = 'Reservar';
+            reserveButton.classList.remove('bg-green-500');
+            reserveButton.classList.add('bg-blue-500');
+        }
     });
+}
 
     function fetchAndRenderRequests() {
         const requestsList = document.getElementById('requestsList');
