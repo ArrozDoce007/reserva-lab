@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
-    const navButtons = document.querySelectorAll('.nav-button');
     const profileButton = document.getElementById('profile-button');
     const profileMenu = document.getElementById('profile-menu');
     const logoutButton = document.getElementById('logout-button');
@@ -10,29 +9,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let activeSection = 'RESERVAR';
 
     function renderContent() {
-        const userType = localStorage.getItem('userType'); // Assume que o tipo de usuário é armazenado no localStorage
+        const userType = localStorage.getItem('userType');
         let content = '';
 
         // Mostrar ou esconder o botão "PEDIDOS" com base no tipo de usuário
         const pedidosButton = document.getElementById('btn-pedidos');
-        const navMenu = document.getElementById('nav-menu');
-
         if (pedidosButton) {
-            if (userType === 'adm') {
-                pedidosButton.style.display = 'inline-block'; // Mostra o botão
-            } else {
-                pedidosButton.style.display = 'none'; // Esconde o botão
-            }
+            pedidosButton.style.display = userType === 'adm' ? 'inline-block' : 'none';
         }
 
-        // Ajustar o layout dos botões se o botão "PEDIDOS" estiver oculto
-        if (pedidosButton.style.display === 'none') {
-            navMenu.classList.add('space-x-14');
-            navMenu.classList.remove('space-x-4', 'md:space-x-8');
-        } else {
-            navMenu.classList.add('space-x-4', 'md:space-x-8');
-            navMenu.classList.remove('space-x-6');
-        }
+        // Ajustar o layout dos botões
+        navMenu.classList.toggle('space-x-14', pedidosButton.style.display === 'none');
+        navMenu.classList.toggle('space-x-4', pedidosButton.style.display !== 'none');
+        navMenu.classList.toggle('md:space-x-8', pedidosButton.style.display !== 'none');
 
         switch (activeSection) {
             case 'RESERVAR':
@@ -120,10 +109,20 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'SOLICITAÇÕES':
                 content = `
                     <h1 class="text-2xl font-bold mb-6">Solicitações de Reserva</h1>
+                    <div class="mb-4">
+                        <label for="statusFilter" class="block text-gray-700 text-sm font-bold mb-2">Filtrar por Status</label>
+                        <select id="statusFilter" class="p-2 border rounded">
+                            <option value="todos">Todos</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="aprovado">Aprovado</option>
+                            <option value="rejeitado">Rejeitado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+                    </div>
                     <div id="requestsList" class="bg-white rounded-lg shadow p-6">
                         <p class="text-center text-gray-500">Carregando solicitações...</p>
                     </div>
-        
+
                     <div id="cancelConfirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
                         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                             <div class="mt-3 text-center">
@@ -155,10 +154,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (userType === 'adm') {
                     content = `
                         <h1 class="text-2xl font-bold mb-6">Pedidos de Reserva</h1>
+                        <div class="mb-4">
+                            <label for="statusFilter" class="block text-gray-700 text-sm font-bold mb-2">Filtrar por Status</label>
+                            <select id="statusFilter" class="p-2 border rounded">
+                                <option value="todos">Todos</option>
+                                <option value="pendente">Pendente</option>
+                                <option value="aprovado">Aprovado</option>
+                            </select>
+                        </div>
                         <div id="requestsList" class="bg-white rounded-lg shadow p-6">
                             <p class="text-center text-gray-500">Carregando pedidos...</p>
                         </div>
-        
+                        
                         <div id="confirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
                             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                                 <div class="mt-3 text-center">
@@ -199,51 +206,67 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleNavClick(event) {
-        const section = event.target.getAttribute('data-section');
-        if (section) {
-            activeSection = section;
-            renderContent();
-            navButtons.forEach(button => button.classList.remove('border-blue-600', 'text-blue-600'));
-            event.target.classList.add('border-blue-600', 'text-blue-600');
+        const clickedButton = event.target.closest('button');
+        if (clickedButton) {
+            const section = clickedButton.textContent.trim();
+            if (section) {
+                activeSection = section;
+                renderContent();
+                navMenu.querySelectorAll('button').forEach(button => {
+                    button.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600', 'pb-2');
+                    button.classList.add('text-gray-500', 'hover:text-blue-600');
+                });
+                clickedButton.classList.remove('text-gray-500', 'hover:text-blue-600');
+                clickedButton.classList.add('text-blue-600', 'border-b-2', 'border-blue-600', 'pb-2');
+            }
         }
     }
 
     // Inicializa o conteúdo da seção ativa
     renderContent();
 
-    // Adiciona event listeners para os botões de navegação
-    navButtons.forEach(button => button.addEventListener('click', handleNavClick));
+    navMenu.addEventListener('click', handleNavClick);
+
+    // Função para alternar a visibilidade do menu de perfil
+    function toggleProfileMenu(event) {
+        event.stopPropagation();
+        profileMenu.classList.toggle('hidden');
+    }
 
     // Mostrar/Esconder o menu de perfil ao clicar no botão
-    profileButton.addEventListener('click', function () {
-        profileMenu.classList.toggle('hidden');
-    });
+    profileButton.addEventListener('click', toggleProfileMenu);
 
     // Atualiza o perfil do usuário
-    const userName = localStorage.getItem('userName');
-    const userMatricula = localStorage.getItem('userMatricula');
+    function updateUserProfile() {
+        const userName = localStorage.getItem('userName');
+        const userMatricula = localStorage.getItem('userMatricula');
 
-    if (userName && userMatricula) {
-        document.getElementById('user-name').textContent = userName;
-        document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
-        loginButton.classList.add('hidden'); // Oculta o botão de "Entrar"
-        logoutButton.classList.remove('hidden'); // Mostra o botão de "Sair"
-    } else {
-        loginButton.classList.remove('hidden'); // Mostra o botão de "Entrar"
-        logoutButton.classList.add('hidden'); // Oculta o botão de "Sair"
+        if (userName && userMatricula) {
+            document.getElementById('user-name').textContent = userName;
+            document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
+            loginButton.classList.add('hidden'); // Oculta o botão de "Entrar"
+            logoutButton.classList.remove('hidden'); // Mostra o botão de "Sair"
+        } else {
+            loginButton.classList.remove('hidden'); // Mostra o botão de "Entrar"
+            logoutButton.classList.add('hidden'); // Oculta o botão de "Sair"
+        }
     }
+
+    // Chama a função para atualizar o perfil do usuário
+    updateUserProfile();
 
     // Adiciona um listener ao botão de sair
     logoutButton.addEventListener('click', function () {
         // Limpa os dados do usuário do localStorage
         localStorage.removeItem('userName');
         localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
         // Redireciona para a página de login
-        window.location.href = '../index.html'; // Altere para a URL da sua página de login
+        window.location.href = '../index.html';
     });
 
     loginButton.addEventListener('click', function () {
-        window.location.href = '../index.html'; // Altere para a URL da sua página de login
+        window.location.href = '../index.html';
     });
 
     // Fechar o menu se clicar fora dele
@@ -259,6 +282,105 @@ document.addEventListener('DOMContentLoaded', function () {
         const closeModalButton = document.getElementById('closeModal');
         const reserveButton = document.getElementById('reserveButton');
         const reservationFormContainer = document.getElementById('reservationForm');
+        const dateInput = document.getElementById('date');
+        const timeInput = document.getElementById('time');
+        const timeFimInput = document.getElementById('time_fim');
+
+        // Função para buscar a data e hora de Brasília de uma API
+        async function fetchBrasiliaTime() {
+            try {
+                const response = await fetch('http://worldtimeapi.org/api/timezone/America/Sao_Paulo');
+                const data = await response.json();
+                const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
+                const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
+                const currentTime = currentDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
+
+                dateInput.min = today;
+                timeInput.min = currentTime; // Define a hora mínima para o horário de início
+                timeFimInput.min = currentTime; // Define a hora mínima para o horário de término
+
+                // Remove o valor predefinido dos campos de horário
+                timeInput.value = '';
+                timeFimInput.value = '';
+
+                // Adiciona event listeners para atualizar o horário de término e validar
+                dateInput.addEventListener('change', updateDate);
+                timeInput.addEventListener('change', updateTimeFimMin);
+                timeFimInput.addEventListener('change', validateTimeFim);
+
+            } catch (error) {
+                console.error('Erro ao buscar a hora de Brasília:', error);
+                alert('Erro ao obter a data e hora atual. Por favor, tente novamente.');
+            }
+        }
+
+        // Função para atualizar o valor mínimo do horário de término baseado na data e no horário de início
+        function updateTimeFimMin() {
+            const startTime = timeInput.value;
+            const selectedDate = dateInput.value;
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+
+            if (selectedDate === currentDate) {
+                timeInput.min = currentTime;
+            } else {
+                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
+            }
+
+            if (startTime) {
+                timeFimInput.min = startTime;
+            }
+
+            // Valida o horário de término quando o horário de início é alterado
+            validateTimeFim();
+        }
+
+        // Função para validar o horário de término
+        function validateTimeFim() {
+            const startTime = timeInput.value;
+            const endTime = timeFimInput.value;
+            const selectedDate = dateInput.value;
+
+            if (startTime && endTime) {
+                // Converte os horários para objetos Date para facilitar a comparação
+                const start = new Date(`${selectedDate}T${startTime}:00`);
+                const end = new Date(`${selectedDate}T${endTime}:00`);
+
+                // Calcula a diferença em horas
+                const timeDifference = (end - start) / (1000 * 60 * 60);
+
+                if (end < start) {
+                    alert('O horário de término não pode ser anterior ao horário de início.');
+                    timeFimInput.value = startTime;
+                } else if (timeDifference < 1) {
+                    alert('A duração mínima da reserva deve ser de 1 hora.');
+                    // Define o horário de término para 1 hora após o horário de início
+                    const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
+                    timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
+                }
+            }
+        }
+
+        // Função para atualizar a hora mínima com base na data selecionada
+        function updateDate() {
+            const selectedDate = dateInput.value;
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
+            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+
+            if (selectedDate === currentDate) {
+                timeInput.min = currentTime;
+            } else {
+                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
+            }
+
+            // Atualiza a hora mínima do campo de término quando a data é alterada
+            updateTimeFimMin();
+        }
+
+        // Chama a função para buscar a data e hora de Brasília
+        fetchBrasiliaTime();
 
         // Adiciona um listener para o botão de fechar o modal
         closeModalButton.addEventListener('click', function () {
@@ -297,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 userMatricula: userMatricula // Inclui a matrícula do usuário
             };
 
-            // Start the interactive animation
+            // Inicia a animação de processamento
             reserveButton.classList.add('animate-bounce');
             reserveButton.textContent = 'Processando...';
 
@@ -340,10 +462,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     const result = await response.json();
                     const errorMessage = result.error || "Erro ao processar a reserva.";
                     alert(errorMessage);
+
+                    // Restora o estado do botão
+                    reserveButton.textContent = 'Reservar';
+                    reserveButton.classList.remove('bg-green-500');
+                    reserveButton.classList.add('bg-blue-500');
                 }
             } catch (error) {
                 console.error("Erro ao enviar a reserva:", error);
                 alert("Erro ao processar a reserva.");
+
+                // Restora o estado do botão
+                reserveButton.textContent = 'Reservar';
+                reserveButton.classList.remove('bg-green-500');
+                reserveButton.classList.add('bg-blue-500');
             }
         });
     }
@@ -355,13 +487,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function fetchAndRenderRequests() {
         const requestsList = document.getElementById('requestsList');
         const userMatricula = localStorage.getItem('userMatricula');
+        const statusFilter = document.getElementById('statusFilter');
 
         if (!userMatricula) {
             requestsList.innerHTML = '<p class="text-center text-gray-500">Por favor, faça o login para ver suas solicitações.</p>';
             return;
         }
 
-        requestsList.innerHTML = '<p class="text-center text-gray-500">Carregando solicitações...</p>'; // Indicador de carregamento
+        requestsList.innerHTML = '<p class="text-center text-gray-500">Carregando solicitações...</p>';
 
         fetch('https://api-reserva-lab.vercel.app/reserve/status')
             .then(response => {
@@ -371,43 +504,65 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(requests => {
-                const userRequests = requests.filter(request => request.user_matricula === userMatricula);
+                let userRequests = requests.filter(request => request.user_matricula === userMatricula);
 
-                if (userRequests.length === 0) {
-                    requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma solicitação encontrada.</p>';
-                } else {
-                    const requestsHTML = userRequests.map(request =>
-                        `<div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                            <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
-                            <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
-                            <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
-                            <p class="text-sm text-gray-600">Horário de Inicio: ${request.time}</p>
-                            <p class="text-sm text-gray-600">Horário de Termino: ${request.time_fim}</p>
-                            <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
-                            <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
-                            ${(request.status === 'pendente' || request.status === 'aprovado') ?
-                            `<button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm cancel-request" data-id="${request.id}">
-                                Cancelar Solicitação
-                            </button>` : ''}
-                        </div>`
-                    ).join('');
+                statusFilter.addEventListener('change', function () {
+                    const selectedStatus = this.value;
+                    renderFilteredRequests(userRequests, selectedStatus);
+                });
 
-                    requestsList.innerHTML = requestsHTML;
-
-                    document.querySelectorAll('.cancel-request').forEach(button => {
-                        button.addEventListener('click', function () {
-                            const requestId = this.getAttribute('data-id');
-                            console.log(`ID da solicitação no clique: ${requestId}`);
-                            showCancelConfirmation(requestId);
-                        });
-                    });
-                }
+                renderFilteredRequests(userRequests, 'todos');
             })
             .catch(error => {
                 console.error(error);
                 requestsList.innerHTML = '<p class="text-center text-red-500">Erro ao carregar as solicitações.</p>';
             });
     }
+
+    function renderFilteredRequests(requests, status) {
+        const requestsList = document.getElementById('requestsList');
+        let filteredRequests = requests;
+
+        if (status !== 'todos') {
+            filteredRequests = requests.filter(request => request.status === status);
+        }
+
+        if (filteredRequests.length === 0) {
+            requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma solicitação encontrada.</p>';
+        } else {
+            filteredRequests.sort((a, b) => {
+                const statusOrder = { 'aprovado': 1, 'pendente': 2, 'rejeitado': 3, 'cancelado': 4 };
+                return statusOrder[a.status] - statusOrder[b.status] || b.id - a.id;
+            });
+
+            const requestsHTML = filteredRequests.map(request =>
+                `<div class="bg-white shadow-md rounded-lg p-4 mb-4">
+                    <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
+                    <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
+                    <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
+                    <p class="text-sm text-gray-600">Horário de Inicio: ${request.time}</p>
+                    <p class="text-sm text-gray-600">Horário de Termino: ${request.time_fim}</p>
+                    <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
+                    <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
+                    ${(request.status === 'pendente' || request.status === 'aprovado') ?
+                    `<button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm cancel-request" data-id="${request.id}">
+                        Cancelar Solicitação
+                    </button>` : ''}
+                </div>`
+            ).join('');
+
+            requestsList.innerHTML = requestsHTML;
+
+            document.querySelectorAll('.cancel-request').forEach(button => {
+                button.addEventListener('click', function () {
+                    const requestId = this.getAttribute('data-id');
+                    showCancelConfirmation(requestId);
+                });
+            });
+        }
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', fetchAndRenderRequests);
 
     function formatDate(dateString) {
         const [year, month, day] = dateString.split('-');
@@ -515,6 +670,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchAndRenderPedidos() {
         const requestsList = document.getElementById('requestsList');
+        const statusFilter = document.getElementById('statusFilter');
+
+        requestsList.innerHTML = '<p class="text-center text-gray-500">Carregando pedidos...</p>';
 
         fetch('https://api-reserva-lab.vercel.app/reserve/status/geral')
             .then(response => {
@@ -529,60 +687,86 @@ document.addEventListener('DOMContentLoaded', function () {
                     request.status === 'pendente' || request.status === 'aprovado'
                 );
 
-                if (filteredRequests.length === 0) {
-                    requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma solicitação encontrada.</p>';
-                } else {
-                    const requestsHTML = filteredRequests.map(request => {
-                        let actionButtons = '';
-                        if (request.status === 'pendente') {
-                            actionButtons = `
-                            <button class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm approve-request" data-id="${request.id}">
-                                Aprovar
-                            </button>
-                            <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm reject-request" data-id="${request.id}">
-                                Rejeitar
-                            </button>
-                        `;
-                        }
+                statusFilter.addEventListener('change', function () {
+                    const selectedStatus = this.value;
+                    renderFilteredPedidos(filteredRequests, selectedStatus);
+                });
 
-                        return `
-                        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                            <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
-                            <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
-                            <p class="text-sm text-gray-600">Solicitante: ${request.nome}</p>
-                            <p class="text-sm text-gray-600">Matricula: ${request.matricula}</p>
-                            <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
-                            <p class="text-sm text-gray-600">Horário de Inicio: ${request.time}</p>
-                            <p class="text-sm text-gray-600">Horário de Termino: ${request.time_fim}</p>
-                            <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
-                            <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
-                            ${actionButtons}
-                        </div>
-                    `;
-                    }).join('');
-
-                    requestsList.innerHTML = requestsHTML;
-
-                    // Adicionar eventos aos botões de aprovação e rejeição, se existirem
-                    document.querySelectorAll('.approve-request').forEach(button => {
-                        button.addEventListener('click', function () {
-                            const pedidoId = this.getAttribute('data-id');
-                            showConfirmationModal('aprovar', pedidoId);
-                        });
-                    });
-
-                    document.querySelectorAll('.reject-request').forEach(button => {
-                        button.addEventListener('click', function () {
-                            const pedidoId = this.getAttribute('data-id');
-                            showConfirmationModal('rejeitar', pedidoId);
-                        });
-                    });
-                }
+                renderFilteredPedidos(filteredRequests, 'todos');
             })
             .catch(error => {
                 console.error('Erro:', error);
-                requestsList.innerHTML = '<p class="text-center text-gray-500">Erro ao carregar as solicitações.</p>';
+                requestsList.innerHTML = '<p class="text-center text-red-500">Erro ao carregar os pedidos.</p>';
             });
+    }
+
+    function renderFilteredPedidos(requests, status) {
+        const requestsList = document.getElementById('requestsList');
+        let filteredRequests = requests;
+
+        if (status !== 'todos') {
+            filteredRequests = requests.filter(request => request.status === status);
+        }
+
+        if (filteredRequests.length === 0) {
+            requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhum pedido encontrado.</p>';
+        } else {
+            filteredRequests.sort((a, b) => {
+                if (a.status === 'pendente' && b.status !== 'pendente') {
+                    return -1; // 'pendente' vem primeiro
+                }
+                if (a.status !== 'pendente' && b.status === 'pendente') {
+                    return 1; // 'aprovado' vem depois
+                }
+                return b.id - a.id; // Se os status forem iguais, ordenar por ID decrescente
+            });
+
+            const requestsHTML = filteredRequests.map(request => {
+                let actionButtons = '';
+                if (request.status === 'pendente') {
+                    actionButtons = `
+                        <button class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm approve-request" data-id="${request.id}">
+                            Aprovar
+                        </button>
+                        <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm reject-request" data-id="${request.id}">
+                            Rejeitar
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+                        <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
+                        <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
+                        <p class="text-sm text-gray-600">Solicitante: ${request.nome}</p>
+                        <p class="text-sm text-gray-600">Matricula: ${request.matricula}</p>
+                        <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
+                        <p class="text-sm text-gray-600">Horário de Inicio: ${request.time}</p>
+                        <p class="text-sm text-gray-600">Horário de Termino: ${request.time_fim}</p>
+                        <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
+                        <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
+                        ${actionButtons}
+                    </div>
+                `;
+            }).join('');
+
+            requestsList.innerHTML = requestsHTML;
+
+            // Adicionar eventos aos botões de aprovação e rejeição, se existirem
+            document.querySelectorAll('.approve-request').forEach(button => {
+                button.addEventListener('click', function () {
+                    const pedidoId = this.getAttribute('data-id');
+                    showConfirmationModal('aprovar', pedidoId);
+                });
+            });
+
+            document.querySelectorAll('.reject-request').forEach(button => {
+                button.addEventListener('click', function () {
+                    const pedidoId = this.getAttribute('data-id');
+                    showConfirmationModal('rejeitar', pedidoId);
+                });
+            });
+        }
     }
 
     function showConfirmationModal(action, pedidoId) {
