@@ -1,0 +1,39 @@
+.circle-progress {
+    width: 80px;
+    height: 80px;
+}
+
+.circle-progress__circle {
+    stroke: #E5E7EB;
+    fill: none;
+    stroke-width: 3;
+}
+
+.circle-progress__value {
+    stroke: #3B82F6;
+    fill: none;
+    stroke-width: 3;
+    stroke-dasharray: 80, 100;
+}
+
+.circle-progress__text {
+    font-size: 12px;
+    font-weight: 500;
+    fill: #3B82F6;
+    text-anchor: middle;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+#nav-menu {
+    margin-left: -120px; /* Ajuste o valor conforme necessário */
+}
+
+@media (max-width: 720px) {
+    #nav-menu {
+        margin-left: 0px; /* Ajuste o valor conforme necessário */
+    }
+}
