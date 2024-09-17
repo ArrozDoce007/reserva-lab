@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Função para buscar a data e hora de Brasília de uma API
         async function fetchBrasiliaTime() {
             try {
-                const response = await fetch('http://localhost:5000/time/brazilia'); // Altere o URL se necessário
+                const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia'); // Altere o URL se necessário
                 const data = await response.json();
                 const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
                 const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
