@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'SOLICITAÇÕES':
                 content = `
                     <h1 class="text-2xl font-bold mb-6">Solicitações de Reserva</h1>
-                    <div class="mb-4">
+                    <div class="mb-4 centralizar">
                         <label for="statusFilter" class="block text-gray-700 text-sm font-bold mb-2">Filtrar por Status</label>
                         <select id="statusFilter" class="p-2 border rounded">
                             <option value="todos">Todos</option>
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (userType === 'adm') {
                     content = `
                         <h1 class="text-2xl font-bold mb-6">Pedidos de Reserva</h1>
-                        <div class="mb-4">
+                        <div class="mb-4 centralizar">
                             <label for="statusFilter" class="block text-gray-700 text-sm font-bold mb-2">Filtrar por Status</label>
                             <select id="statusFilter" class="p-2 border rounded">
                                 <option value="todos">Todos</option>
