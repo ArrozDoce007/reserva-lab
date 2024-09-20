@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 function shouldHideCancel(requestDate, requestTime, requestStatus) {
                     const requestStartTime = new Date(`${requestDate}T${requestTime}`); // Combina data e hora do pedido
                     const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60); // Diferença em minutos
-                    return requestStatus === 'aprovado' && timeDifference <= 60; // Só esconder se status for 'aprovado' e faltar 1h ou menos
+                    return timeDifference < 0; // Esconde o botão apenas se o horário atual já tiver passado
                 }
 
                 return `
