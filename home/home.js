@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
                     <div id="reservationForm" class="hidden mt-8">
                         <h2 class="text-xl font-semibold mb-4">Reservar <span id="labName"></span></h2>
+                        <div id="unavailableTimesTable" class="mt-4 mb-4"></div>
                         <form id="labReservationForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                             <div class="mb-4">
                                 <label class="block text-gray-700 text-sm font-bold mb-2" for="date">
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 </button>
                             </div>
                         </form>
+                        </div> 
                     </div>
         
                     <div id="confirmationModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
@@ -373,6 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const timeInput = document.getElementById('time');
         const timeFimInput = document.getElementById('time_fim');
 
+        dateInput.dispatchEvent(new Event('change'));
         // Função para buscar a data e hora de Brasília de uma API
         async function fetchBrasiliaTime() {
             try {
@@ -397,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             } catch (error) {
                 console.error('Erro ao buscar a hora de Brasília:', error);
-                alert('Erro ao obter a data e hora atual. Por favor, tente novamente.');
+                alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
             }
         }
 
@@ -439,7 +442,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (end < start) {
                     alert('O horário de término não pode ser anterior ao horário de início.');
-                    timeFimInput.value = startTime;
+                    const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
+                    timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
                 } else if (timeDifference < 1) {
                     alert('A duração mínima da reserva deve ser de 1 hora.');
                     // Define o horário de término para 1 hora após o horário de início
@@ -488,25 +492,38 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Verifica se o usuário está logado
             const userName = localStorage.getItem('userName');
             const userMatricula = localStorage.getItem('userMatricula');
 
             if (!userName || !userMatricula) {
-                // Armazena uma mensagem temporária e redireciona para a página de login
                 localStorage.setItem('loginMessage', 'Por favor, faça o login para continuar.');
-                window.location.href = '../index.html'; // URL da sua página de login
+                window.location.href = '../index.html';
+                return;
+            }
+
+            const labName = document.getElementById("labName").textContent;
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const timeFim = document.getElementById("time_fim").value;
+            const purpose = document.getElementById("purpose").value;
+
+            // Check if the selected time slot is available
+            const unavailableTimes = await fetchUnavailableTimes(labName);
+            const isTimeSlotAvailable = checkTimeSlotAvailability(unavailableTimes, date, time, timeFim);
+
+            if (!isTimeSlotAvailable) {
+                alert('O horário selecionado não está disponível. Por favor, escolha outro horário.');
                 return;
             }
 
             const data = {
-                labName: document.getElementById("labName").textContent,
-                date: document.getElementById("date").value,
-                time: document.getElementById("time").value,
-                time_fim: document.getElementById("time_fim").value, // Inclui o horário de término
-                purpose: document.getElementById("purpose").value,
-                userName: userName,         // Inclui o nome do usuário
-                userMatricula: userMatricula // Inclui a matrícula do usuário
+                labName,
+                date,
+                time,
+                time_fim: timeFim,
+                purpose,
+                userName,
+                userMatricula
             };
 
             // Inicia a animação de processamento
@@ -567,6 +584,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 reserveButton.classList.remove('bg-green-500');
                 reserveButton.classList.add('bg-blue-500');
             }
+        });
+
+        function checkTimeSlotAvailability(unavailableTimes, date, startTime, endTime) {
+            const requestStart = new Date(`${date}T${startTime}`);
+            const requestEnd = new Date(`${date}T${endTime}`);
+
+            for (const reservation of unavailableTimes) {
+                const reservationStart = new Date(`${reservation.date}T${reservation.time}`);
+                const reservationEnd = new Date(`${reservation.date}T${reservation.time_fim}`);
+
+                if (
+                    (requestStart >= reservationStart && requestStart < reservationEnd) ||
+                    (requestEnd > reservationStart && requestEnd <= reservationEnd) ||
+                    (requestStart <= reservationStart && requestEnd >= reservationEnd)
+                ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setupReservationForm();
         });
     }
 
@@ -669,6 +710,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return 'text-red-600';
             case 'cancelado':
                 return 'text-gray-600';
+            case 'concluído':
+                return 'text-blue-600';
             default:
                 return 'text-gray-600';
         }
@@ -794,23 +837,30 @@ document.addEventListener('DOMContentLoaded', function () {
         const requestsList = document.getElementById('requestsList');
         let filteredRequests = requests;
 
+        // Filtrar os pedidos pelo status, exceto se for 'todos'
         if (status !== 'todos') {
             filteredRequests = requests.filter(request => request.status === status);
         }
 
+        // Se não houver pedidos filtrados, exibir uma mensagem
         if (filteredRequests.length === 0) {
             requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhum pedido encontrado.</p>';
         } else {
+            // Ordenar os pedidos com base no status e depois pelo ID
             filteredRequests.sort((a, b) => {
-                if (a.status === 'pendente' && b.status !== 'pendente') {
-                    return -1; // 'pendente' vem primeiro
+                const statusOrder = ['pendente', 'aprovado',];
+                const statusA = statusOrder.indexOf(a.status);
+                const statusB = statusOrder.indexOf(b.status);
+
+                if (statusA !== statusB) {
+                    return statusA - statusB; // Ordenar pela prioridade de status
                 }
-                if (a.status !== 'pendente' && b.status === 'pendente') {
-                    return 1; // 'aprovado' vem depois
-                }
-                return a.id - b.id; // Se os status forem iguais, ordenar por ID crescente
+
+                // Se os status forem iguais, ordenar por ID crescente
+                return a.id - b.id;
             });
 
+            // Gerar o HTML dos pedidos filtrados
             const requestsHTML = filteredRequests.map(request => {
                 let actionButtons = '';
                 if (request.status === 'pendente') {
@@ -829,10 +879,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
                         <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
                         <p class="text-sm text-gray-600">Solicitante: ${request.nome}</p>
-                        <p class="text-sm text-gray-600">Matricula: ${request.matricula}</p>
+                        <p class="text-sm text-gray-600">Matrícula: ${request.matricula}</p>
                         <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
-                        <p class="text-sm text-gray-600">Horário de Inicio: ${request.time}</p>
-                        <p class="text-sm text-gray-600">Horário de Termino: ${request.time_fim}</p>
+                        <p class="text-sm text-gray-600">Horário de Início: ${request.time}</p>
+                        <p class="text-sm text-gray-600">Horário de Término: ${request.time_fim}</p>
                         <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
                         <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
                         ${actionButtons}
@@ -840,9 +890,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
             }).join('');
 
+            // Renderizar os pedidos na página
             requestsList.innerHTML = requestsHTML;
 
-            // Adicionar eventos aos botões de aprovação e rejeição, se existirem
+            // Adicionar eventos aos botões de aprovação e rejeição
             document.querySelectorAll('.approve-request').forEach(button => {
                 button.addEventListener('click', function () {
                     const pedidoId = this.getAttribute('data-id');
@@ -981,12 +1032,126 @@ document.addEventListener('DOMContentLoaded', function () {
     renderContent();
 });
 
+let currentLabName = '';
+let currentFetchPromise = null;
+
 function showReservationForm(labName) {
     const form = document.getElementById('reservationForm');
     const labNameSpan = document.getElementById('labName');
+    const dateInput = document.getElementById('date');
+    const tableContainer = document.getElementById('unavailableTimesTable');
 
     form.classList.remove('hidden');
     labNameSpan.textContent = labName;
 
+    // Clear previous data and show loading state
+    if (tableContainer) {
+        tableContainer.innerHTML = '<p class="text-gray-600 font-semibold">Selecione uma data para ver os horários indisponíveis.</p>';
+    }
+
+    // Update current lab name
+    currentLabName = labName;
+
+    // Clear the date input
+    dateInput.value = '';
+
+    // Remove existing event listener before adding a new one
+    dateInput.removeEventListener('change', updateTable);
+    dateInput.addEventListener('change', updateTable);
+
     form.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function fetchUnavailableTimes(labName) {
+    try {
+        const response = await fetch(`https://api-reserva-lab.vercel.app/reserve/status/geral`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch reservations');
+        }
+        const reservations = await response.json();
+        return reservations.filter(reservation =>
+            reservation.lab_name === labName &&
+            (reservation.status === 'aprovado' || reservation.status === 'pendente')
+        );
+    } catch (error) {
+        console.error('Error fetching unavailable times:', error);
+        return [];
+    }
+}
+
+function updateTable() {
+    const dateInput = document.getElementById('date');
+    const tableContainer = document.getElementById('unavailableTimesTable');
+    const selectedDate = dateInput.value;
+
+    if (selectedDate) {
+        tableContainer.innerHTML = '<p class="text-gray-600 font-semibold">Carregando horários indisponíveis...</p>';
+
+        // Cancel any ongoing fetch
+        if (currentFetchPromise) {
+            currentFetchPromise.cancel();
+        }
+
+        // Create a new promise with cancellation capability
+        currentFetchPromise = {
+            promise: fetchUnavailableTimes(currentLabName),
+            cancel: () => { } // This will be overwritten if needed
+        };
+
+        currentFetchPromise.promise
+            .then(unavailableTimes => {
+                // Check if this is still the current request
+                if (currentFetchPromise.promise === currentFetchPromise.promise) {
+                    renderUnavailableTimesTable(unavailableTimes, selectedDate);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tableContainer.innerHTML = '<p class="text-red-600 font-semibold">Erro ao carregar horários indisponíveis. Por favor, tente novamente.</p>';
+            });
+    } else {
+        tableContainer.innerHTML = '<p class="text-yellow-600 font-semibold">Por favor, selecione uma data para ver os horários indisponíveis.</p>';
+    }
+}
+
+function renderUnavailableTimesTable(unavailableTimes, selectedDate) {
+    const tableContainer = document.getElementById('unavailableTimesTable');
+
+    // Filter unavailable times for the selected date
+    const filteredTimes = unavailableTimes.filter(time => time.date === selectedDate);
+
+    if (filteredTimes.length === 0) {
+        tableContainer.innerHTML = '<p class="text-green-600 font-semibold">Todos os horários estão disponíveis para a data selecionada.</p>';
+        return;
+    }
+
+    const tableHTML = `
+        <h3 class="text-lg font-semibold mb-2">Horários já reservados para ${formatDate(selectedDate)}</h3>
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horário de Início</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horário de Término</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                ${filteredTimes.map((reservation, index) => `
+                    <tr class="${index % 1 === 0 ? 'bg-white' : 'bg-white'}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${reservation.time}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${reservation.time_fim}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm ${reservation.status === 'aprovado' ? 'text-green-600 bg-green-200' : 'text-yellow-600 bg-yellow-200'}">${reservation.status}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+
+    tableContainer.innerHTML = tableHTML;
+}
+
+// Helper function to format date (YYYY-MM-DD to DD/MM/YYYY)
+function formatDate(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
 }
