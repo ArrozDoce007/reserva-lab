@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Remove a mensagem após exibir
     localStorage.removeItem('loginMessage');
 
-    // Esconde o toast após 3 segundos
+    // Esconde o toast após segundos
     setTimeout(function () {
       toast.className = toast.className.replace('show', '');
-    }, 3000);
+    }, 5000);
   }
 
   // Alterna a visibilidade da senha
