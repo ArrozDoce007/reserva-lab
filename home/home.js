@@ -460,8 +460,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (startTime && endTime) {
                 // Converte os horários para objetos Date para facilitar a comparação
-                const start = new Date(`${selectedDate}T${startTime}:00`);
-                const end = new Date(`${selectedDate}T${endTime}:00`);
+                const start = new Date(`${selectedDate}T${startTime}:00-03:00`); // Para horário de Brasília
+                const end = new Date(`${selectedDate}T${endTime}:00-03:00`);
 
                 // Calcula a diferença em horas
                 const timeDifference = (end - start) / (1000 * 60 * 60);
@@ -478,6 +478,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         }
+
+        // Função para validar se a hora de início
+        function validateStartTime() {
+            const startTime = timeInput.value;
+            const minTime = "06:59";
+            const maxTime = "23:00";
+
+            if (startTime < minTime) {
+                alert('O horário de início não pode ser anterior a 07:00.');
+                timeInput.value = ''; // Limpa o campo de hora de início
+            } else if (startTime > maxTime) {
+                alert('O horário de início não pode ser após 23:00.');
+                timeInput.value = ''; // Limpa o campo de hora de início
+            }
+        }
+
+        // Adiciona um listener para o campo de hora de início
+        timeInput.addEventListener('change', function () {
+            validateStartTime();
+        });
 
         // Função para atualizar a hora mínima com base na data selecionada
         function updateDate() {
@@ -637,10 +657,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        fetchAndRenderRequests();
-    });    
-
     function fetchAndRenderRequests() {
         const requestsList = document.getElementById('requestsList');
         const userMatricula = localStorage.getItem('userMatricula');
@@ -702,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ajustando a ordem para que 'pendente' tenha maior prioridade
             filteredRequests.sort((a, b) => {
                 const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
-                return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
+                return statusOrder[a.status] - statusOrder[b.status] || b.id - a.id;
             });
 
             const requestsHTML = filteredRequests.map(request => {
@@ -910,8 +926,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return statusA - statusB; // Ordenar pela prioridade de status
                 }
 
-                // Se os status forem iguais, ordenar por ID crescente
-                return a.id - b.id;
+                // Se os status forem iguais, ordenar por ID decrescente
+                return b.id - a.id;
             });
 
             // Gerar o HTML dos pedidos filtrados
@@ -922,7 +938,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 function shouldHideCancel(requestDate, requestTime) {
                     const requestStartTime = new Date(`${requestDate}T${requestTime}`); // Combina data e hora do pedido
                     const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60); // Diferença em minutos
-                    return timeDifference < 0; // Esconde o botão apenas se o horário atual já tiver passado
+                    return timeDifference < 60; // Esconde o botão
                 }
 
                 // Exibir botões de ação dependendo do status
@@ -1200,23 +1216,30 @@ function showReservationForm(labName) {
     const form = document.getElementById('reservationForm');
     const labNameSpan = document.getElementById('labName');
     const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    const timeFimInput = document.getElementById('time_fim');
+    const purposeInput = document.getElementById('purpose');
     const tableContainer = document.getElementById('unavailableTimesTable');
 
+    // Exibe o formulário de reserva
     form.classList.remove('hidden');
     labNameSpan.textContent = labName;
 
-    // Clear previous data and show loading state
+    // Limpa o formulário ao alternar de laboratório
+    dateInput.value = '';
+    timeInput.value = '';
+    timeFimInput.value = '';
+    purposeInput.value = '';
+
+    // Reinicializa o conteúdo da tabela de horários indisponíveis
     if (tableContainer) {
         tableContainer.innerHTML = '<p class="text-gray-600 font-semibold">Selecione uma data para ver os horários indisponíveis.</p>';
     }
 
-    // Update current lab name
+    // Atualiza o nome do laboratório atual
     currentLabName = labName;
 
-    // Clear the date input
-    dateInput.value = '';
-
-    // Remove existing event listener before adding a new one
+    // Remove o listener de evento anterior antes de adicionar um novo
     dateInput.removeEventListener('change', updateTable);
     dateInput.addEventListener('change', updateTable);
 
