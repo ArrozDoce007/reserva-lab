@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
                 const data = await response.json();
-                const currentDateTime = new Date(`${data.datetime}Z`); // Adiciona 'Z' para garantir que a data seja interpretada como UTC
+                const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
                 const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
                 const currentTime = currentDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
 
@@ -437,26 +437,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const now = new Date();
             const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
             const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
-        
-            // Ajustar para considerar se a hora atual é depois de 21:00
-            const hourNow = now.getHours();
-            if (selectedDate === currentDate && hourNow >= 21) {
-                // Se a hora atual for 21h ou mais, permite apenas o tempo restante no dia atual
+
+            if (selectedDate === currentDate) {
                 timeInput.min = currentTime;
-                timeFimInput.min = currentTime;
-            } else if (selectedDate === currentDate) {
-                // Se for o mesmo dia e antes das 21h, permite o horário a partir da hora atual
-                timeInput.min = currentTime;
-                timeFimInput.min = startTime || currentTime;
             } else {
-                // Se a data for futura, permite qualquer hora
-                timeInput.min = '00:00';
-                timeFimInput.min = startTime || '00:00';
+                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
             }
-        
+
+            if (startTime) {
+                timeFimInput.min = startTime;
+            }
+
             // Valida o horário de término quando o horário de início é alterado
             validateTimeFim();
-        }        
+        }
 
         // Função para validar o horário de término
         function validateTimeFim() {
@@ -490,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const startTime = timeInput.value;
             const minTime = "06:59";
             const maxTime = "23:00";
-        
+
             if (startTime < minTime) {
                 alert('O horário de início não pode ser anterior a 07:00.');
                 timeInput.value = ''; // Limpa o campo de hora de início
@@ -707,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
             const data = await response.json();
-            currentDateTime = new Date(`${data.datetime}Z`); // Adiciona 'Z' para garantir que a data seja interpretada como UTC
+            currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
         } catch (error) {
             console.error('Erro ao buscar a hora de Brasília:', error);
             alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
@@ -724,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ajustando a ordem para que 'pendente' tenha maior prioridade
             filteredRequests.sort((a, b) => {
                 const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
-                return statusOrder[a.status] - statusOrder[b.status] || b.id - a.id;
+                return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
             });
 
             const requestsHTML = filteredRequests.map(request => {
@@ -761,8 +755,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     }
-
-    document.getElementById('statusFilter').addEventListener('change', fetchAndRenderRequests);
 
     function formatDate(dateString) {
         const [year, month, day] = dateString.split('-');
@@ -906,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
             const data = await response.json();
-            currentDateTime = new Date(`${data.datetime}Z`); // Adiciona 'Z' para garantir que a data seja interpretada como UTC
+            currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
         } catch (error) {
             console.error('Erro ao buscar a hora de Brasília:', error);
             alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
@@ -933,7 +925,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Se os status forem iguais, ordenar por ID decrescente
-                return b.id - a.id;
+                return a.id - b.id;
             });
 
             // Gerar o HTML dos pedidos filtrados
