@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Ajustando a ordem para que 'pendente' tenha maior prioridade
             filteredRequests.sort((a, b) => {
                 const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
-                return statusOrder[a.status] - statusOrder[b.status] || b.id - a.id;
+                return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
             });
 
             const requestsHTML = filteredRequests.map(request => {
