@@ -407,28 +407,42 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
                 const data = await response.json();
-                const currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
-                const today = currentDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
-                const currentTime = currentDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
 
-                dateInput.min = today;
-                timeInput.min = currentTime; // Define a hora mínima para o horário de início
-                timeFimInput.min = currentTime; // Define a hora mínima para o horário de término
+                // Converte a data e hora retornada pela API em um objeto Date
+                const brasiliaDateTime = new Date(data.datetime);
+                const brasiliaDate = brasiliaDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
+                const brasiliaTime = brasiliaDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
 
-                // Remove o valor predefinido dos campos de horário
+                // Define a data mínima para o campo de data como a data atual de Brasília
+                dateInput.min = brasiliaDate;
+
+                // Se a data selecionada for a atual, define a hora mínima para o horário atual
+                dateInput.addEventListener('change', function () {
+                    const selectedDate = dateInput.value;
+
+                    if (selectedDate === brasiliaDate) {
+                        // Define a hora mínima como a hora atual de Brasília se for o mesmo dia
+                        timeInput.min = brasiliaTime;
+                    } else {
+                        // Para datas futuras, permite qualquer horário
+                        timeInput.min = '00:00';
+                    }
+                });
+
+                timeInput.min = brasiliaTime;
+                timeFimInput.min = timeInput.min;
+
+                // Remove os valores predefinidos dos campos de horário
                 timeInput.value = '';
                 timeFimInput.value = '';
-
-                // Adiciona event listeners para atualizar o horário de término e validar
-                dateInput.addEventListener('change', updateDate);
-                timeInput.addEventListener('change', updateTimeFimMin);
-                timeFimInput.addEventListener('change', validateTimeFim);
 
             } catch (error) {
                 console.error('Erro ao buscar a hora de Brasília:', error);
                 alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
             }
         }
+
+        fetchBrasiliaTime();
 
         // Função para atualizar o valor mínimo do horário de término baseado na data e no horário de início
         function updateTimeFimMin() {
