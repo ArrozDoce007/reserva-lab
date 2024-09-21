@@ -1,0 +1,60 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    /* Necessário para o posicionamento do canvas */
+    font-family: monospace;
+}
+
+#canvas {
+    position: fixed;
+    /* Mantém o canvas fixo em relação à janela */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    /* Coloca o canvas atrás do conteúdo */
+}
+
+.content {
+    position: relative;
+    /* Permite que o conteúdo fique na frente do canvas */
+    z-index: 1;
+    /* Para garantir que o conteúdo fique acima do canvas */
+    padding: 20px;
+    color: white;
+    /* Para melhor contraste */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+#nav-menu {
+    margin-left: -175px;
+    /* Ajuste o valor conforme necessário */
+}
+
+@media (max-width: 728px) {
+    #nav-menu {
+        margin-left: 0px;
+        /* Ajuste o valor conforme necessário */
+    }
+
+    .centralizar {
+        margin-left: auto;
+        margin-right: auto;
+        width: fit-content;
+        /* Ajusta a largura ao conteúdo */
+    }
+}
