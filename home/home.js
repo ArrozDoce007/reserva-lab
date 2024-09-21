@@ -926,8 +926,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return statusA - statusB; // Ordenar pela prioridade de status
                 }
 
-                // Se os status forem iguais, ordenar por ID decrescente
-                return b.id - a.id;
+                // Se os status forem iguais, ordenar por ID crescente
+                return a.id - b.id;
             });
 
             // Gerar o HTML dos pedidos filtrados
