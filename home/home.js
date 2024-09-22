@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationCount = document.getElementById('notification-count');
     const notificationsList = document.getElementById('notifications-list');
 
+    function clearUserData() {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
+    }
+    
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
@@ -1336,3 +1342,5 @@ function formatDate(dateString) {
 }
 
 window.onload = function () { var t, e, n, o, i, a = document.getElementById("canvas"); t = a, e = window.screen, n = t.width = e.width, o = t.height = e.height, i = Array(256).join(1).split(""), setInterval(function () { t.getContext("2d").fillStyle = "rgba(0,0,0,.05)", t.getContext("2d").fillRect(0, 0, n, o), t.getContext("2d").fillStyle = "#0F0", i.map(function (e, n) { var o = String.fromCharCode(48 + 33 * Math.random()), a = 10 * n; t.getContext("2d").fillText(o, a, e), i[n] = e > 758 + 1e4 * Math.random() ? 0 : e + 10 }) }, 60) };
+
+window.addEventListener('beforeunload', function (e) {clearUserData();});
