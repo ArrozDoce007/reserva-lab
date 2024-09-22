@@ -45,7 +45,7 @@ h1 {
     /* Ajuste o valor conforme necessário */
 }
 
-@media (max-width: 728px) {
+@media (max-width: 720px) {
     #nav-menu {
         margin-left: 5%;
         /* Ajuste o valor conforme necessário */
