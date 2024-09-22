@@ -41,13 +41,27 @@ h1 {
 }
 
 #nav-menu {
-    margin-left: -175px;
+    margin-left: -135px;
     /* Ajuste o valor conforme necessário */
 }
 
 @media (max-width: 728px) {
     #nav-menu {
-        margin-left: 0px;
+        margin-left: 30px;
+        /* Ajuste o valor conforme necessário */
+    }
+
+    .centralizar {
+        margin-left: auto;
+        margin-right: auto;
+        width: fit-content;
+        /* Ajusta a largura ao conteúdo */
+    }
+}
+
+@media (max-width: 320px) {
+    #nav-menu {
+        margin-left: -1px;
         /* Ajuste o valor conforme necessário */
     }
 
