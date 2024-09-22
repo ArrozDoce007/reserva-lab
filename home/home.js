@@ -402,39 +402,25 @@ document.addEventListener('DOMContentLoaded', function () {
         const timeFimInput = document.getElementById('time_fim');
 
         dateInput.dispatchEvent(new Event('change'));
-        // Função para buscar a data e hora de Brasília de uma API
+
         async function fetchBrasiliaTime() {
             try {
                 const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
                 const data = await response.json();
+                const currentDateTime = new Date(data.datetime);
+                const today = currentDateTime.toISOString().split('T')[0];
 
-                // Converte a data e hora retornada pela API em um objeto Date
-                const brasiliaDateTime = new Date(data.datetime);
-                const brasiliaDate = brasiliaDateTime.toISOString().split('T')[0]; // Formata a data como YYYY-MM-DD
-                const brasiliaTime = brasiliaDateTime.toTimeString().split(' ')[0].substring(0, 5); // Formata o horário como HH:MM
+                dateInput.min = today;
+                dateInput.value = today;
 
-                // Define a data mínima para o campo de data como a data atual de Brasília
-                dateInput.min = brasiliaDate;
-
-                // Se a data selecionada for a atual, define a hora mínima para o horário atual
-                dateInput.addEventListener('change', function () {
-                    const selectedDate = dateInput.value;
-
-                    if (selectedDate === brasiliaDate) {
-                        // Define a hora mínima como a hora atual de Brasília se for o mesmo dia
-                        timeInput.min = brasiliaTime;
-                    } else {
-                        // Para datas futuras, permite qualquer horário
-                        timeInput.min = '00:00';
-                    }
-                });
-
-                timeInput.min = brasiliaTime;
-                timeFimInput.min = timeInput.min;
-
-                // Remove os valores predefinidos dos campos de horário
                 timeInput.value = '';
                 timeFimInput.value = '';
+
+                dateInput.addEventListener('change', updateDate);
+                timeInput.addEventListener('change', updateTimeFimMin);
+                timeFimInput.addEventListener('change', validateTimeFim);
+
+                updateDate();
 
             } catch (error) {
                 console.error('Erro ao buscar a hora de Brasília:', error);
@@ -442,95 +428,92 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        fetchBrasiliaTime();
-
-        // Função para atualizar o valor mínimo do horário de término baseado na data e no horário de início
-        function updateTimeFimMin() {
-            const startTime = timeInput.value;
+        function updateDate() {
             const selectedDate = dateInput.value;
             const now = new Date();
-            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
-            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
+            const currentDate = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
 
             if (selectedDate === currentDate) {
                 timeInput.min = currentTime;
+                timeFimInput.min = currentTime;
             } else {
-                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
+                timeInput.min = '07:00'; // Mantendo o horário mínimo como 07:00
+                timeFimInput.min = '07:00';
             }
 
-            if (startTime) {
-                timeFimInput.min = startTime;
+            // Limpa os campos de horário quando a data é alterada
+            timeInput.value = '';
+            timeFimInput.value = '';
+
+            updateTimeFimMin();
+        }
+
+        function updateTimeFimMin() {
+            const selectedDate = dateInput.value;
+            const startTime = timeInput.value;
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
+
+            if (selectedDate === currentDate) {
+                if (startTime < currentTime) {
+                    timeInput.value = currentTime;
+                }
+                timeFimInput.min = timeInput.value || currentTime;
+            } else {
+                timeFimInput.min = startTime || '07:00';
             }
 
-            // Valida o horário de término quando o horário de início é alterado
             validateTimeFim();
         }
 
-        // Função para validar o horário de término
         function validateTimeFim() {
             const startTime = timeInput.value;
             const endTime = timeFimInput.value;
             const selectedDate = dateInput.value;
-
+        
             if (startTime && endTime) {
-                // Converte os horários para objetos Date para facilitar a comparação
-                const start = new Date(`${selectedDate}T${startTime}:00-03:00`); // Para horário de Brasília
+                // Convert the times to Date objects for easier comparison
+                const start = new Date(`${selectedDate}T${startTime}:00-03:00`);
                 const end = new Date(`${selectedDate}T${endTime}:00-03:00`);
-
-                // Calcula a diferença em horas
+                const maxEnd = new Date(`${selectedDate}T22:00:00-03:00`);
+        
+                // Calculate the difference in hours
                 const timeDifference = (end - start) / (1000 * 60 * 60);
-
-                if (end < start) {
+        
+                if (end > maxEnd) {
+                    alert('O horário de término não pode ser após 22:00.');
+                    timeFimInput.value = '22:00';
+                } else if (end < start) {
                     alert('O horário de término não pode ser anterior ao horário de início.');
                     const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
                     timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
                 } else if (timeDifference < 1) {
                     alert('A duração mínima da reserva deve ser de 1 hora.');
-                    // Define o horário de término para 1 hora após o horário de início
                     const newEndTime = new Date(start.getTime() + (60 * 60 * 1000));
                     timeFimInput.value = newEndTime.toTimeString().split(' ')[0].substring(0, 5);
                 }
             }
         }
 
-        // Função para validar se a hora de início
         function validateStartTime() {
             const startTime = timeInput.value;
-            const minTime = "06:59";
-            const maxTime = "23:00";
+            const minTime = "07:00";
+            const maxTime = "21:00";
 
             if (startTime < minTime) {
                 alert('O horário de início não pode ser anterior a 07:00.');
-                timeInput.value = ''; // Limpa o campo de hora de início
+                timeInput.value = minTime;
             } else if (startTime > maxTime) {
-                alert('O horário de início não pode ser após 23:00.');
-                timeInput.value = ''; // Limpa o campo de hora de início
+                alert('O horário de início não pode ser após 21:00.');
+                timeInput.value = maxTime;
             }
-        }
-
-        // Adiciona um listener para o campo de hora de início
-        timeInput.addEventListener('change', function () {
-            validateStartTime();
-        });
-
-        // Função para atualizar a hora mínima com base na data selecionada
-        function updateDate() {
-            const selectedDate = dateInput.value;
-            const now = new Date();
-            const currentDate = now.toISOString().split('T')[0]; // Data atual no formato YYYY-MM-DD
-            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5); // Hora atual no formato HH:MM
-
-            if (selectedDate === currentDate) {
-                timeInput.min = currentTime;
-            } else {
-                timeInput.min = '00:00'; // Se a data for futura, permite qualquer hora
-            }
-
-            // Atualiza a hora mínima do campo de término quando a data é alterada
             updateTimeFimMin();
         }
 
-        // Chama a função para buscar a data e hora de Brasília
+        timeInput.addEventListener('change', validateStartTime);
+
         fetchBrasiliaTime();
 
         // Adiciona um listener para o botão de fechar o modal
