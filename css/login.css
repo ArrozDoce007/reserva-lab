@@ -39,7 +39,7 @@ body {
 .toast {
     visibility: hidden;
     min-width: 250px;
-    margin-left: 0px;
+    margin-left: -150px;
     background-color: #333;
     color: #fff;
     text-align: center;
