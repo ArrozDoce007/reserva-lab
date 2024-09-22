@@ -10,8 +10,8 @@ body {
     width: 100%;
     height: 100%;
     position: relative;
-    /* Necessário para o posicionamento do canvas */
     font-family: monospace;
+    overflow: hidden;
 }
 
 #canvas {
