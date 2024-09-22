@@ -41,13 +41,13 @@ h1 {
 }
 
 #nav-menu {
-    margin-left: -135px;
+    margin-left: -15%;
     /* Ajuste o valor conforme necessário */
 }
 
 @media (max-width: 728px) {
     #nav-menu {
-        margin-left: 30px;
+        margin-left: 5%;
         /* Ajuste o valor conforme necessário */
     }
 
@@ -61,7 +61,7 @@ h1 {
 
 @media (max-width: 320px) {
     #nav-menu {
-        margin-left: -1px;
+        margin-left: -1.5%;
         /* Ajuste o valor conforme necessário */
     }
 
