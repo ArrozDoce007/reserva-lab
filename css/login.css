@@ -39,19 +39,20 @@ body {
 .toast {
     visibility: hidden;
     min-width: 250px;
-    margin-left: -185px;
+    max-width: 80%;
     background-color: #333;
-    color: #fff;
+    color: #ff0000;
     text-align: center;
     border-radius: 2px;
     position: fixed;
     z-index: 1;
     left: 50%;
     top: 30px;
-    font-size: 17px;
+    font-size: 20px;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
     opacity: 0;
     transition: opacity 0.5s, visibility 0.5s;
+    transform: translateX(-50%);
 }
 
 .toast.show {
