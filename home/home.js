@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationCount = document.getElementById('notification-count');
     const notificationsList = document.getElementById('notifications-list');
 
+    function clearUserData() {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
+    }
+
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
@@ -381,9 +387,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
+        clearUserData();
         window.location.href = '../index.html';
     });
 
@@ -1216,6 +1220,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    window.addEventListener('beforeunload', function (e) { clearUserData(); });
     // Initial render
     renderContent();
 });
