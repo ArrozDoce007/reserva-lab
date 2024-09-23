@@ -1222,7 +1222,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    window.addEventListener('beforeunload', function (e) { clearUserData(); });
+    window.addEventListener('unload', function (e) { clearUserData(); });
+
     // Initial render
     renderContent();
 });
