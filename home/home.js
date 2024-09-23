@@ -379,10 +379,11 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
-        window.location.href = '../index.html';
+    // Limpa todos os dados do localStorage
+    localStorage.clear();
+    
+    // Redireciona para a página de login
+    window.location.href = '../index.html';
     });
 
     loginButton.addEventListener('click', function () {
