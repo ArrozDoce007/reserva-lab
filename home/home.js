@@ -29,12 +29,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Detectar quando o navegador ou aba está sendo fechado, mas não quando está recarregando
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-            // O navegador está sendo fechado ou a aba está sendo escondida
-            clearUserData();
+    // Detectar quando o navegador ou aba está sendo fechado (não recarregado)
+    window.addEventListener('beforeunload', function (event) {
+        // Verifica se é um recarregamento ou fechamento de aba
+        if (!sessionStorage.getItem('isReloading')) {
+            clearUserData();  // Limpa os dados se for um fechamento de aba
         }
+    });
+
+    // Marcar a página como recarregada
+    window.addEventListener('load', function () {
+        sessionStorage.setItem('isReloading', 'true');
+    });
+
+    // Limpar a marcação de recarregamento ao sair da página
+    window.addEventListener('beforeunload', function () {
+        sessionStorage.removeItem('isReloading');
     });
 
     let activeSection = 'RESERVAR';
