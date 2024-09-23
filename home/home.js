@@ -1230,11 +1230,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        // Se a página veio do cache, recarrega a página
-        window.location.reload();
-    }
     // Initial render
     renderContent();
 });
