@@ -12,15 +12,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationsList = document.getElementById('notifications-list');
 
     function clearUserData() {
-    // Remover dados do localStorage
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userMatricula');
-    localStorage.removeItem('userType');
+        // Remover dados do localStorage
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
 
-    // Limpar campos de nome e matrícula na interface
-    const userNameField = document.getElementById('user-name');
-    const userMatriculaField = document.getElementById('user-matricula');
-    
+        // Limpar campos de nome e matrícula na interface
+        const userNameField = document.getElementById('user-name');
+        const userMatriculaField = document.getElementById('user-matricula');
+        
         if (userNameField) {
             userNameField.textContent = '';
         }
@@ -28,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
             userMatriculaField.textContent = '';
         }
     }
+
+    // Detectar quando o navegador ou aba está sendo fechado, mas não quando está recarregando
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            // O navegador está sendo fechado ou a aba está sendo escondida
+            clearUserData();
+        }
+    });
 
     let activeSection = 'RESERVAR';
 
@@ -378,8 +386,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
-
     // Atualiza o perfil do usuário
     function updateUserProfile() {
         const userName = localStorage.getItem('userName');
@@ -399,22 +405,12 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
-    // Listener para o botão de logout
-    logoutButton.addEventListener('click', function () {
         clearUserData();
         window.location.href = '../index.html';
     });
 
     loginButton.addEventListener('click', function () {
         window.location.href = '../index.html';
-    });
-
-    // Deslogar o usuário apenas quando o navegador ou aba for fechado
-    document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'hidden') {
-            // O navegador ou aba está sendo fechado
-            clearUserData();
-        }
     });
 
     function setupReservationForm() {
