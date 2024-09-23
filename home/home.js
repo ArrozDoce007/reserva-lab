@@ -29,14 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Deslogar o usuário apenas quando a aba ou o navegador forem fechados
-    document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'hidden') {
-            // O navegador está sendo fechado ou a aba está sendo escondida
-            clearUserData();
-        }
-    });
-
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
@@ -407,14 +399,22 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
+    // Listener para o botão de logout
+    logoutButton.addEventListener('click', function () {
+        clearUserData();
         window.location.href = '../index.html';
     });
 
     loginButton.addEventListener('click', function () {
         window.location.href = '../index.html';
+    });
+
+    // Deslogar o usuário apenas quando o navegador ou aba for fechado
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            // O navegador ou aba está sendo fechado
+            clearUserData();
+        }
     });
 
     function setupReservationForm() {
