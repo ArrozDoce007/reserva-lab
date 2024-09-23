@@ -1238,8 +1238,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    window.addEventListener('unload', function (e) { clearUserData(); });
-
     // Initial render
     renderContent();
 });
