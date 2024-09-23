@@ -13,74 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let activeSection = 'RESERVAR';
 
-    ffunction checkAuthentication() {
-        const userName = localStorage.getItem('userName');
-        const userMatricula = localStorage.getItem('userMatricula');
-        const userType = localStorage.getItem('userType');
-        
-        if (!userName || !userMatricula || !userType) {
-            // Limpa qualquer dado residual
-            localStorage.clear();
-            // Redireciona para a página de login
-            window.location.href = '../index.html';
-            return false;
-        }
-        return true;
-    }
-
-    function updateUserProfile() {
-        const userName = localStorage.getItem('userName');
-        const userMatricula = localStorage.getItem('userMatricula');
-        const userNameElement = document.getElementById('user-name');
-        const userMatriculaElement = document.getElementById('user-matricula');
-
-        if (userName && userMatricula) {
-            userNameElement.textContent = userName;
-            userMatriculaElement.textContent = `Matrícula: ${userMatricula}`;
-            loginButton.classList.add('hidden');
-            logoutButton.classList.remove('hidden');
-            profileButton.classList.remove('hidden');
-        } else {
-            userNameElement.textContent = '';
-            userMatriculaElement.textContent = '';
-            loginButton.classList.remove('hidden');
-            logoutButton.classList.add('hidden');
-            profileButton.classList.add('hidden');
-        }
-    }
-
-    function logout() {
-        localStorage.clear(); // Limpa todos os dados do localStorage
-        updateUserProfile(); // Atualiza a interface imediatamente
-        window.location.href = '../index.html'; // Redireciona para a página de login
-    }
-
-    logoutButton.addEventListener('click', logout);
-
-    loginButton.addEventListener('click', function () {
-        window.location.href = '../index.html';
-    });
-
-    // Verifica a autenticação no carregamento da página
-    if (!checkAuthentication()) {
-        return; // Interrompe a execução se não estiver autenticado
-    }
-
-    // Atualiza o perfil do usuário
-    updateUserProfile();
-
-    // Adiciona um listener para mudanças no localStorage (útil para sincronização entre abas)
-    window.addEventListener('storage', function(e) {
-        if (e.key === null) {
-            // localStorage foi limpo
-            logout();
-        } else if (e.key === 'userName' || e.key === 'userMatricula' || e.key === 'userType') {
-            updateUserProfile();
-        }
-    });
-
-    // Resto do seu código...
-
     async function fetchNotifications() {
         const userMatricula = localStorage.getItem('userMatricula');
         if (!userMatricula) return [];
@@ -96,9 +28,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function updateNotifications() {
-        if (!checkAuthentication()) return; // Verifica autenticação antes de atualizar notificações
         const notifications = await fetchNotifications();
         renderNotifications(notifications);
+    }
+
+    function renderNotifications(notifications) {
+        if (notifications.length > 0) {
+            notificationsList.innerHTML = notifications.map(notification => `
+                <div class="mb-2 pb-2 border-b border-gray-200 last:border-b-0">
+                    <p class="text-sm font-medium">${notification.message}</p>
+                    <p class="text-xs text-gray-500">${new Date(notification.created_at).toLocaleString()}</p>
+                </div>
+            `).join('');
+            notificationCount.textContent = notifications.length;
+            notificationCount.classList.remove('hidden');
+        } else {
+            notificationsList.innerHTML = '<p>Nenhuma nova notificação.</p>';
+            notificationCount.classList.add('hidden');
+        }
     }
 
     async function clearNotifications() {
@@ -377,6 +324,7 @@ document.addEventListener('DOMContentLoaded', function () {
         notificationMenu.classList.toggle('hidden');
     });
 
+    // Mostrar/Esconder o menu de perfil ao clicar no botão
     profileButton.addEventListener('click', (event) => {
         event.stopPropagation();
         notificationMenu.classList.add('hidden'); // Fecha o menu de notificações, se estiver aberto
@@ -385,10 +333,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearNotificationsButton.addEventListener('click', clearNotifications);
 
-    setInterval(updateNotifications, 3000); // Atualiza as notificações a cada 3 segundos
-    updateNotifications(); // Primeira atualização imediata
+    setInterval(updateNotifications, 3000);
 
-    // Fecha menus ao clicar fora deles
+    updateNotifications();
+
     document.addEventListener('click', (event) => {
         if (!notificationButton.contains(event.target) && !notificationMenu.contains(event.target)) {
             notificationMenu.classList.add('hidden');
@@ -396,6 +344,50 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
             profileMenu.classList.add('hidden');
         }
+    });
+
+    // Fechar o menu de notificações se clicar fora dele
+    document.addEventListener('click', (event) => {
+        if (!notificationButton.contains(event.target) && !notificationMenu.contains(event.target)) {
+            notificationMenu.classList.add('hidden');
+        }
+    });
+
+    // Fechar o menu de perfil se clicar fora dele
+    document.addEventListener('click', (event) => {
+        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
+            profileMenu.classList.add('hidden');
+        }
+    });
+
+    // Atualiza o perfil do usuário
+    function updateUserProfile() {
+        const userName = localStorage.getItem('userName');
+        const userMatricula = localStorage.getItem('userMatricula');
+
+        if (userName && userMatricula) {
+            document.getElementById('user-name').textContent = userName;
+            document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
+            loginButton.classList.add('hidden');
+            logoutButton.classList.remove('hidden');
+        } else {
+            loginButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
+        }
+    }
+
+    updateUserProfile();
+
+    logoutButton.addEventListener('click', function () {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
+        window.location.href = '../index.html';
+    });
+
+    loginButton.addEventListener('click', function () {
+        window.location.href = '../index.html';
+    });
 
     function setupReservationForm() {
         const form = document.getElementById('labReservationForm');
