@@ -381,7 +381,13 @@ document.addEventListener('DOMContentLoaded', function () {
     logoutButton.addEventListener('click', function () {
     // Limpa todos os dados do localStorage
     localStorage.clear();
-    
+
+    const formFields = ['userName', 'userMatricula', 'password'];
+    formFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) element.value = '';
+    });
+        
     // Redireciona para a página de login
     window.location.href = '../index.html';
     });
