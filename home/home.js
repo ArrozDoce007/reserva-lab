@@ -12,9 +12,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationsList = document.getElementById('notifications-list');
 
     function clearUserData() {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
+    // Remover dados do localStorage
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userMatricula');
+    localStorage.removeItem('userType');
+
+    // Limpar campos de nome e matrícula na interface
+    const userNameField = document.getElementById('user-name');
+    const userMatriculaField = document.getElementById('user-matricula');
+    
+        if (userNameField) {
+            userNameField.textContent = '';
+        }
+        if (userMatriculaField) {
+            userMatriculaField.textContent = '';
+        }
     }
 
     let activeSection = 'RESERVAR';
