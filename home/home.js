@@ -10,12 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearNotificationsButton = document.getElementById('clear-notifications');
     const notificationCount = document.getElementById('notification-count');
     const notificationsList = document.getElementById('notifications-list');
-
-    window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        // Se a página veio do cache, recarrega a página
-        window.location.reload();
-    }
     
     let activeSection = 'RESERVAR';
 
@@ -1236,6 +1230,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Se a página veio do cache, recarrega a página
+        window.location.reload();
+    }
     // Initial render
     renderContent();
 });
