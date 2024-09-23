@@ -1,3 +1,9 @@
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Se a página veio do cache, recarrega a página
+        window.location.reload();
+    }
+
 document.addEventListener('DOMContentLoaded', function () {
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
