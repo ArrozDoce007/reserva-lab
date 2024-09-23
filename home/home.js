@@ -29,6 +29,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Deslogar o usuário apenas quando a aba ou o navegador forem fechados
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+            // O navegador está sendo fechado ou a aba está sendo escondida
+            clearUserData();
+        }
+    });
+
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
