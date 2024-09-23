@@ -8,20 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const toast = document.getElementById('toast');
   const loginMessage = localStorage.getItem('loginMessage');
 
-  function clearFormFields() {
-        const formFields = ['matricula', 'password'];
-        formFields.forEach(field => {
-            const element = document.getElementById(field);
-            if (element) element.value = '';
-        });
-    }
-
-  clearFormFields();
-  if (window.location.href.includes('logout=')) {
-    clearFormFields();
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-  
   if (loginMessage) {
     toast.textContent = loginMessage;
     toast.className = 'toast show';
