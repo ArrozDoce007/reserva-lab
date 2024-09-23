@@ -64,9 +64,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (response.ok && data.success) {
         // Armazena informações do usuário no localStorage
-        localStorage.setItem('userName', data.nome);
-        localStorage.setItem('userMatricula', data.matricula);
-        localStorage.setItem('userType', data.tipo_usuario);
+        sessionStorage.setItem('userName', data.nome);
+        sessionStorage.setItem('userMatricula', data.matricula);
+        sessionStorage.setItem('userType', data.tipo_usuario);
 
         // Redireciona para a página principal
         window.location.href = './home/home.html'; // Altere para a URL desejada
