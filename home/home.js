@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const userMatriculaField = document.getElementById('user-matricula');
         
         if (userNameField) {
-            userNameField.textContent = '';
+            userNameField.textContent = 'Nome do Usuário';
         }
         if (userMatriculaField) {
-            userMatriculaField.textContent = '';
+            userMatriculaField.textContent = 'Matrícula';
         }
     }
 
