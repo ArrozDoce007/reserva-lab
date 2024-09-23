@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    checkAuthentication();
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
     const profileButton = document.getElementById('profile-button');
@@ -10,8 +11,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearNotificationsButton = document.getElementById('clear-notifications');
     const notificationCount = document.getElementById('notification-count');
     const notificationsList = document.getElementById('notifications-list');
-    
+
     let activeSection = 'RESERVAR';
+
+    function checkAuthentication() {
+        const userName = localStorage.getItem('userName');
+        const userMatricula = localStorage.getItem('userMatricula');
+        
+        if (!userName || !userMatricula) {
+            // Se não houver dados de usuário, redireciona para a página de login
+            window.location.href = '../index.html';
+        }
+    }
 
     async function fetchNotifications() {
         const userMatricula = localStorage.getItem('userMatricula');
@@ -380,13 +391,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateUserProfile() {
         const userName = localStorage.getItem('userName');
         const userMatricula = localStorage.getItem('userMatricula');
-
+    
         if (userName && userMatricula) {
             document.getElementById('user-name').textContent = userName;
             document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
             loginButton.classList.add('hidden');
             logoutButton.classList.remove('hidden');
         } else {
+            document.getElementById('user-name').textContent = '';
+            document.getElementById('user-matricula').textContent = '';
             loginButton.classList.remove('hidden');
             logoutButton.classList.add('hidden');
         }
@@ -395,9 +408,12 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
+        // Remove todos os dados do usuário do localStorage
         localStorage.removeItem('userName');
         localStorage.removeItem('userMatricula');
         localStorage.removeItem('userType');
+
+        // Redireciona para a página de login
         window.location.href = '../index.html';
     });
 
