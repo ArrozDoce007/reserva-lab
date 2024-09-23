@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('userMatricula');
         localStorage.removeItem('userType');
     }
-    
+
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
@@ -414,10 +414,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
                 const data = await response.json();
                 const currentDateTime = new Date(data.datetime);
-                const today = currentDateTime.toISOString().split('T')[0];
+
+                // Obtém a hora atual de Brasília
+                const currentHour = currentDateTime.getHours();
+
+                const today = currentHour >= 21
+                    ? new Date(currentDateTime.setDate(currentDateTime.getDate() - 1)).toISOString().split('T')[0]
+                    : currentDateTime.toISOString().split('T')[0];
 
                 dateInput.min = today;
                 dateInput.value = today;
+
+                dateInput.addEventListener('input', function () {
+                    if (this.value < today) {
+                        alert('Você não pode selecionar uma data anterior a hoje.');
+                        this.value = today;  // Reseta a data para hoje se uma anterior for escolhida
+                    }
+                });
 
                 timeInput.value = '';
                 timeFimInput.value = '';
@@ -427,7 +440,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 timeFimInput.addEventListener('change', validateTimeFim);
 
                 updateDate();
-
             } catch (error) {
                 console.error('Erro ao buscar a hora de Brasília:', error);
                 alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
@@ -440,18 +452,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentDate = now.toISOString().split('T')[0];
             const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
 
+            // Calcula a data de ontem
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            const formattedYesterday = yesterday.toISOString().split('T')[0];
+
             if (selectedDate === currentDate) {
                 timeInput.min = currentTime;
                 timeFimInput.min = currentTime;
+            } else if (selectedDate === formattedYesterday) {
+                // Preenche automaticamente o campo de hora com o horário atual se a data for ontem
+                timeInput.value = currentTime;
             } else {
                 timeInput.min = '07:00'; // Mantendo o horário mínimo como 07:00
                 timeFimInput.min = '07:00';
             }
 
-            // Limpa os campos de horário quando a data é alterada
-            timeInput.value = '';
             timeFimInput.value = '';
-
             updateTimeFimMin();
         }
 
@@ -463,9 +480,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
 
             if (selectedDate === currentDate) {
-                if (startTime < currentTime) {
-                    timeInput.value = currentTime;
-                }
                 timeFimInput.min = timeInput.value || currentTime;
             } else {
                 timeFimInput.min = startTime || '07:00';
@@ -478,16 +492,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const startTime = timeInput.value;
             const endTime = timeFimInput.value;
             const selectedDate = dateInput.value;
-        
+
             if (startTime && endTime) {
-                // Convert the times to Date objects for easier comparison
                 const start = new Date(`${selectedDate}T${startTime}:00-03:00`);
                 const end = new Date(`${selectedDate}T${endTime}:00-03:00`);
                 const maxEnd = new Date(`${selectedDate}T22:00:00-03:00`);
-        
-                // Calculate the difference in hours
+
                 const timeDifference = (end - start) / (1000 * 60 * 60);
-        
+
                 if (end > maxEnd) {
                     alert('O horário de término não pode ser após 22:00.');
                     timeFimInput.value = '22:00';
@@ -505,13 +517,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
         function validateStartTime() {
             const startTime = timeInput.value;
-            const minTime = "07:00";
+
+            // Verifica se o horário é anterior a 6:59
+            const minValidTime = "07:00";
+            if (startTime < minValidTime) {
+                alert('O horário de início não pode ser anterior a 7:00.');
+                timeInput.value = minValidTime; // Reseta para 6:59
+            }
+
             const maxTime = "21:00";
 
-            if (startTime < minTime) {
-                alert('O horário de início não pode ser anterior a 07:00.');
-                timeInput.value = minTime;
-            } else if (startTime > maxTime) {
+            if (startTime > maxTime) {
                 alert('O horário de início não pode ser após 21:00.');
                 timeInput.value = maxTime;
             }
@@ -1206,7 +1222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    window.addEventListener('beforeunload', function (e) {clearUserData();});
+    window.addEventListener('beforeunload', function (e) { clearUserData(); });
     // Initial render
     renderContent();
 });
