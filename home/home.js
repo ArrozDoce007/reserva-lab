@@ -324,7 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
         notificationMenu.classList.toggle('hidden');
     });
 
-    // Mostrar/Esconder o menu de perfil ao clicar no botão
     profileButton.addEventListener('click', (event) => {
         event.stopPropagation();
         notificationMenu.classList.add('hidden'); // Fecha o menu de notificações, se estiver aberto
@@ -333,10 +332,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     clearNotificationsButton.addEventListener('click', clearNotifications);
 
-    setInterval(updateNotifications, 3000);
+    setInterval(updateNotifications, 3000); // Atualiza as notificações a cada 3 segundos
+    updateNotifications(); // Primeira atualização imediata
 
-    updateNotifications();
-
+    // Fecha menus ao clicar fora deles
     document.addEventListener('click', (event) => {
         if (!notificationButton.contains(event.target) && !notificationMenu.contains(event.target)) {
             notificationMenu.classList.add('hidden');
@@ -346,21 +345,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Fechar o menu de notificações se clicar fora dele
-    document.addEventListener('click', (event) => {
-        if (!notificationButton.contains(event.target) && !notificationMenu.contains(event.target)) {
-            notificationMenu.classList.add('hidden');
+    // Atualiza o perfil do usuário com base nos dados do localStorage
+    function updateUserProfile() {
+        const userName = localStorage.getItem('userName');
+        const userMatricula = localStorage.getItem('userMatricula');
+
+        if (userName && userMatricula) {
+            document.getElementById('user-name').textContent = userName;
+            document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
+            loginButton.classList.add('hidden');
+            logoutButton.classList.remove('hidden');
+        } else {
+            document.getElementById('user-name').textContent = '';
+            document.getElementById('user-matricula').textContent = '';
+            loginButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
         }
+    }
+
+    updateUserProfile();
+
+    logoutButton.addEventListener('click', function () {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userMatricula');
+        localStorage.removeItem('userType');
+        window.location.href = '../index.html';
     });
 
-    // Fechar o menu de perfil se clicar fora dele
-    document.addEventListener('click', (event) => {
-        if (!profileButton.contains(event.target) && !profileMenu.contains(event.target)) {
-            profileMenu.classList.add('hidden');
-        }
+    loginButton.addEventListener('click', function () {
+        window.location.href = '../index.html';
     });
-
-
 
     // Atualiza o perfil do usuário
     function updateUserProfile() {
