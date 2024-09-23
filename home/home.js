@@ -12,11 +12,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationsList = document.getElementById('notifications-list');
 
     function clearUserData() {
-        // Remover dados do localStorage
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
-
+        // Remover dados do sessionStorage
+        sessionStorage.removeItem('userName');
+        sessionStorage.removeItem('userMatricula');
+        sessionStorage.removeItem('userType');
+    
         // Limpar campos de nome e matrícula na interface
         const userNameField = document.getElementById('user-name');
         const userMatriculaField = document.getElementById('user-matricula');
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
             userMatriculaField.textContent = 'Matrícula';
         }
     }
-
+    
     // Detectar quando o navegador ou aba está sendo fechado (não recarregado)
     window.addEventListener('beforeunload', function (event) {
         // Verifica se é um recarregamento ou fechamento de aba
@@ -36,21 +36,21 @@ document.addEventListener('DOMContentLoaded', function () {
             clearUserData();  // Limpa os dados se for um fechamento de aba
         }
     });
-
+    
     // Marcar a página como recarregada
     window.addEventListener('load', function () {
         sessionStorage.setItem('isReloading', 'true');
     });
-
+    
     // Limpar a marcação de recarregamento ao sair da página
     window.addEventListener('beforeunload', function () {
         sessionStorage.removeItem('isReloading');
-    });
+    });    
 
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
-        const userMatricula = localStorage.getItem('userMatricula');
+        const userMatricula = sessionStorage.getItem('userMatricula');
         if (!userMatricula) return [];
 
         try {
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function clearNotifications() {
-        const userMatricula = localStorage.getItem('userMatricula');
+        const userMatricula = sessionStorage.getItem('userMatricula');
         if (!userMatricula) return;
 
         try {
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderContent() {
-        const userType = localStorage.getItem('userType');
+        const userType = sessionStorage.getItem('userType');
         let content = '';
 
         // Mostrar ou esconder o botão "PEDIDOS" com base no tipo de usuário
@@ -398,8 +398,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Atualiza o perfil do usuário
     function updateUserProfile() {
-        const userName = localStorage.getItem('userName');
-        const userMatricula = localStorage.getItem('userMatricula');
+        const userName = sessionStorage.getItem('userName');
+        const userMatricula = sessionStorage.getItem('userMatricula');
 
         if (userName && userMatricula) {
             document.getElementById('user-name').textContent = userName;
@@ -583,11 +583,11 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const userName = localStorage.getItem('userName');
-            const userMatricula = localStorage.getItem('userMatricula');
+            const userName = sessionStorage.getItem('userName');
+            const userMatricula = sessionStorage.getItem('userMatricula');
 
             if (!userName || !userMatricula) {
-                localStorage.setItem('loginMessage', 'Por favor, faça o login para continuar.');
+                sessionStorage.setItem('loginMessage', 'Por favor, faça o login para continuar.');
                 window.location.href = '../index.html';
                 return;
             }
@@ -704,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchAndRenderRequests() {
         const requestsList = document.getElementById('requestsList');
-        const userMatricula = localStorage.getItem('userMatricula');
+        const userMatricula = sessionStorage.getItem('userMatricula');
         const statusFilter = document.getElementById('statusFilter');
 
         if (!userMatricula) {
