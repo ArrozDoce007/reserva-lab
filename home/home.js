@@ -1,9 +1,3 @@
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        // Se a página veio do cache, recarrega a página
-        window.location.reload();
-    }
-
 document.addEventListener('DOMContentLoaded', function () {
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
@@ -17,6 +11,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const notificationCount = document.getElementById('notification-count');
     const notificationsList = document.getElementById('notifications-list');
 
+    window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Se a página veio do cache, recarrega a página
+        window.location.reload();
+    }
+    
     let activeSection = 'RESERVAR';
 
     async function fetchNotifications() {
