@@ -383,8 +383,6 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('userMatricula');
         localStorage.removeItem('userType');
         window.location.href = '../index.html';
-        userNameField.textContent = 'Nome do Usuário';
-        userMatriculaField.textContent = 'Matrícula';
     });
 
     loginButton.addEventListener('click', function () {
