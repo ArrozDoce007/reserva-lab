@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Validação da matrícula e envio do formulário
   form.addEventListener('submit', async function (event) {
-    event.preventDefault(); // Impede o envio padrão do formulário
+    event.preventDefault();
 
     const matriculaValue = matriculaInput.value.trim();
     const passwordValue = passwordInput.value;
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Envia a requisição para a API
     try {
-      const response = await fetch('https://api-reserva-lab.vercel.app/login', { // Atualize a URL conforme necessário
+      const response = await fetch('https://api-reserva-lab.vercel.app/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,8 +68,11 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('userMatricula', data.matricula);
         localStorage.setItem('userType', data.tipo_usuario);
 
+        // Define o estado de login no sessionStorage
+        sessionStorage.setItem('isLoggedIn', 'true');
+
         // Redireciona para a página principal
-        window.location.href = './home/home.html'; // Altere para a URL desejada
+        window.location.replace('./home/home.html');
       } else {
         alert(data.message || 'Matrícula ou senha inválidos');
       }
