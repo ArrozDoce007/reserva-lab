@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Verifica se o usuário fez logout
+    if (sessionStorage.getItem('userLoggedOut') === 'true') {
+        // Limpa o localStorage e o sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        // Redireciona para a página de login se necessário
+        if (!window.location.href.includes('index.html')) {
+            window.location.href = '../index.html';
+        }
+        return; // Interrompe a execução do restante do código
+    }
+    
+    const navMenu = document.getElementById('nav-menu');
+    const mainContent = document.getElementById('main-content');
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
     const profileButton = document.getElementById('profile-button');
@@ -64,8 +78,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderContent() {
-        const userType = localStorage.getItem('userType');
-        let content = '';
+    // Verifica se o usuário está autenticado
+    if (!localStorage.getItem('userName') || !localStorage.getItem('userMatricula') || sessionStorage.getItem('userLoggedOut') === 'true') {
+        window.location.href = '../index.html';
+        return;
+    }
+
+    const userType = localStorage.getItem('userType');
+    let content = '';
 
         // Mostrar ou esconder o botão "PEDIDOS" com base no tipo de usuário
         const pedidosButton = document.getElementById('btn-pedidos');
@@ -360,29 +380,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Atualiza o perfil do usuário
-    function updateUserProfile() {
-        const userName = localStorage.getItem('userName');
-        const userMatricula = localStorage.getItem('userMatricula');
+   function updateUserProfile() {
+    const userName = localStorage.getItem('userName');
+    const userMatricula = localStorage.getItem('userMatricula');
 
-        if (userName && userMatricula) {
-            document.getElementById('user-name').textContent = userName;
-            document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
-            loginButton.classList.add('hidden');
-            logoutButton.classList.remove('hidden');
-        } else {
-            loginButton.classList.remove('hidden');
-            logoutButton.classList.add('hidden');
-        }
-    }
+    if (userName && userMatricula && !sessionStorage.getItem('userLoggedOut')) {
+        document.getElementById('user-name').textContent = userName;
+        document.getElementById('user-matricula').textContent = `Matrícula: ${userMatricula}`;
+        loginButton.classList.add('hidden');
+        logoutButton.classList.remove('hidden');
+    } else {
+        document.getElementById('user-name').textContent = '';
+        document.getElementById('user-matricula').textContent = '';
+        loginButton.classList.remove('hidden');
+        logoutButton.classList.add('hidden');
+    }}
 
     updateUserProfile();
 
     logoutButton.addEventListener('click', function () {
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userMatricula');
-        localStorage.removeItem('userType');
-        window.location.href = '../index.html';
+    // Remove todos os dados do usuário do localStorage
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userMatricula');
+    localStorage.removeItem('userType');
+    
+    // Adiciona um flag para indicar que o usuário fez logout
+    sessionStorage.setItem('userLoggedOut', 'true');
+    
+    // Redireciona para a página de login
+    window.location.href = '../index.html';
     });
 
     loginButton.addEventListener('click', function () {
