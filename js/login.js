@@ -11,11 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (loginMessage) {
     toast.textContent = loginMessage;
     toast.className = 'toast show';
+    sessionStorage.removeItem('loginMessage');
 
-    // Remove a mensagem após exibir
-    localStorage.removeItem('loginMessage');
-
-    // Esconde o toast após segundos
     setTimeout(function () {
       toast.className = toast.className.replace('show', '');
     }, 5000);
@@ -74,11 +71,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // Redireciona para a página principal
         window.location.replace('./home/home.html');
       } else {
-        alert(data.message || 'Matrícula ou senha inválidos');
+        toast.textContent = data.message || 'Matrícula ou senha inválidos';
+        toast.className = 'toast show';
+        setTimeout(function () {
+          toast.className = toast.className.replace('show', '');
+        }, 5000);
       }
     } catch (error) {
       console.error('Erro ao tentar fazer login:', error);
-      alert('Ocorreu um erro. Tente novamente.');
+      toast.textContent = 'Ocorreu um erro. Tente novamente.';
+      toast.className = 'toast show';
+      setTimeout(function () {
+        toast.className = toast.className.replace('show', '');
+      }, 5000);
     }
   });
 });
