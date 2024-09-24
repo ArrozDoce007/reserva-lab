@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!isLoggedIn || !userName || !userMatricula) {
             // Usuário não está autenticado, redireciona para a página de login
+            sessionStorage.setItem('loginMessage', 'Sessão expirada. Por favor, faça login novamente.');
             window.location.replace('../index.html');
         }
     }
@@ -407,6 +408,9 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('userMatricula');
         localStorage.removeItem('userType');
         sessionStorage.removeItem('isLoggedIn');
+
+        // Define a mensagem de logout
+        sessionStorage.setItem('loginMessage', 'Você foi desconectado. Faça login para continuar.');
 
         // Redireciona para a página de login
         window.location.replace('../index.html');
