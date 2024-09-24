@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const response = await fetch('https://api-reserva-lab.vercel.app/login', { // Atualize a URL conforme necessário
         method: 'POST',
-        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
         },
