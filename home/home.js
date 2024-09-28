@@ -247,8 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <option value="todos">Todos</option>
                                     <option value="pendente">Pendente</option>
                                     <option value="aprovado">Aprovado</option>
-                                    <option value="rejeitado">Rejeitado</option>
-                                    <option value="cancelado">Cancelado</option>
                             </select>
                             <button id="sortByIdButton" class="text-white bg-blue-500 p-2 rounded focus:outline-none">▲</button>
                         </div>
@@ -700,6 +698,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    let currentFilterStatus = 'todos';
+
     function fetchAndRenderRequests() {
         const requestsList = document.getElementById('requestsList');
         const userMatricula = localStorage.getItem('userMatricula');
@@ -723,11 +723,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 let userRequests = requests.filter(request => request.user_matricula === userMatricula);
 
                 statusFilter.addEventListener('change', function () {
-                    const selectedStatus = this.value;
-                    renderFilteredRequests(userRequests, selectedStatus);
+                    currentFilterStatus = this.value;
+                    renderFilteredRequests(userRequests, currentFilterStatus);
                 });
 
-                renderFilteredRequests(userRequests, 'todos');
+                renderFilteredRequests(userRequests, currentFilterStatus);
             })
             .catch(error => {
                 console.error(error);
@@ -744,79 +744,90 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
             const data = await response.json();
-            currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
+            currentDateTime = new Date(data.datetime);
         } catch (error) {
             console.error('Erro ao buscar a hora de Brasília:', error);
             alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
-            return; // Parar a execução caso haja erro
+            return;
         }
 
-        // Filtra as solicitações com base no status
         if (status !== 'todos') {
             filteredRequests = requests.filter(request => request.status === status);
         }
 
         if (filteredRequests.length === 0) {
             requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma solicitação encontrada.</p>';
-            return; // Retorna se não houver solicitações
-        }
+        } else {
+            let isAscending = true;
+            let sortByStatus = true;
 
-        // Ordena as solicitações por status e ID
-        filteredRequests.sort((a, b) => {
-            const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
-            return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
-        });
-
-        // Função para renderizar as solicitações
-        const renderRequests = () => {
-            const requestsHTML = filteredRequests.map(request => {
-                function shouldHideCancel(requestDate, requestTime, requestStatus) {
-                    const requestStartTime = new Date(`${requestDate}T${requestTime}`);
-                    const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60);
-                    return requestStatus === 'aprovado' && timeDifference <= 60;
+            const sortRequests = () => {
+                if (sortByStatus) {
+                    filteredRequests.sort((a, b) => {
+                        const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
+                        return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
+                    });
+                } else {
+                    filteredRequests.sort((a, b) => {
+                        return isAscending ? a.id - b.id : b.id - a.id;
+                    });
                 }
+            };
 
-                return `
-                    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
-                        <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
-                        <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
-                        <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
-                        <p class="text-sm text-gray-600">Horário de Início: ${request.time}</p>
-                        <p class="text-sm text-gray-600">Horário de Término: ${request.time_fim}</p>
-                        <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
-                        <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
-                        ${(request.status === 'pendente' || (request.status === 'aprovado' && !shouldHideCancel(request.date, request.time, request.status))) ?
-                        `<button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm cancel-request" data-id="${request.id}">
-                            Cancelar Solicitação
-                        </button>` : ''}
-                    </div>`;
-            }).join('');
+            const renderRequests = () => {
+                const requestsHTML = filteredRequests.map(request => {
+                    // Função para verificar se o botão "Cancelar" deve estar invisível
+                    function shouldHideCancel(requestDate, requestTime, requestStatus) {
+                        const requestStartTime = new Date(`${requestDate}T${requestTime}`); // Combina data e hora do pedido
+                        const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60); // Diferença em minutos
+                        return requestStatus === 'aprovado' && timeDifference <= 60; // Só esconder se status for 'aprovado' e faltar 1h ou menos
+                    }
 
-            requestsList.innerHTML = requestsHTML;
+                    return `
+                        <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+                            <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
+                            <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
+                            <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
+                            <p class="text-sm text-gray-600">Horário de Início: ${request.time}</p>
+                            <p class="text-sm text-gray-600">Horário de Término: ${request.time_fim}</p>
+                            <p class="text-sm text-gray-600">Finalidade: ${request.purpose}</p>
+                            <p class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</p>
+                            ${(request.status === 'pendente' || (request.status === 'aprovado' && !shouldHideCancel(request.date, request.time, request.status))) ?
+                            `<button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm cancel-request" data-id="${request.id}">
+                                Cancelar Solicitação
+                            </button>` : ''}
+                        </div>`;
+                }).join('');
 
-            // Adiciona os eventos aos botões de cancelar
-            document.querySelectorAll('.cancel-request').forEach(button => {
-                button.addEventListener('click', function () {
-                    const requestId = this.getAttribute('data-id');
-                    showCancelConfirmation(requestId);
+                requestsList.innerHTML = requestsHTML;
+
+                // Adiciona eventos aos botões de cancelamento
+                document.querySelectorAll('.cancel-request').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const requestId = this.getAttribute('data-id');
+                        showCancelConfirmation(requestId);
+                    });
                 });
+            };
+
+            // Ordenação inicial por status
+            sortRequests();
+            renderRequests();
+
+            // Adiciona a lógica de ordenação por ID
+            document.getElementById('sortByIdButton').addEventListener('click', function () {
+                if (sortByStatus) {
+                    sortByStatus = false;
+                    isAscending = true;
+                } else {
+                    isAscending = !isAscending;
+                }
+                this.textContent = isAscending ? '▲' : '▼';
+
+                sortRequests();
+                renderRequests();
             });
-        };
-
-        renderRequests(); // Renderiza as solicitações inicialmente
-
-        let isAscending = true;
-        document.getElementById('sortByIdButton').addEventListener('click', function () {
-            isAscending = !isAscending;
-            this.textContent = isAscending ? '▲' : '▼';
-
-            // Ordena as solicitações por ID
-            filteredRequests.sort((a, b) => {
-                return isAscending ? a.id - b.id : b.id - a.id;
-            });
-
-            renderRequests(); // Renderiza novamente após a ordenação
-        });
+        }
     }
 
     function formatDate(dateString) {
@@ -873,21 +884,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                status: 'cancelado' // Define o status como 'cancelado'
+                status: 'cancelado'
             })
         })
             .then(response => {
-                console.log('Resposta recebida:', response);
                 if (!response.ok) {
                     return response.json().then(errData => {
-                        console.error('Erro no corpo da resposta:', errData);
                         throw new Error(`Erro ${response.status}: ${errData.error || 'Falha ao cancelar a reserva'}`);
                     });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Resposta do servidor:', data);
                 confirmButton.classList.remove('animate-pulse');
                 confirmButton.textContent = 'Solicitação Cancelada';
                 confirmButton.classList.add('bg-red-500');
@@ -895,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Fecha o modal e atualiza a lista de solicitações após um atraso
                 setTimeout(() => {
                     closeModalAndResetButton();
-                    fetchAndRenderRequests();
+                    fetchAndRenderRequests(); // Isso irá re-renderizar as solicitações mantendo o filtro atual
                 }, 1500);
             })
             .catch(error => {
@@ -914,11 +922,13 @@ document.addEventListener('DOMContentLoaded', function () {
         function closeModalAndResetButton() {
             modal.classList.add('hidden');
             modal.classList.remove('flex', 'items-center', 'justify-center');
-            confirmButton.classList.remove('bg-red-500', 'bg-red-500');
-            confirmButton.classList.add('bg-red-500'); // Adiciona uma cor padrão
+            confirmButton.classList.remove('bg-red-500', 'bg-gray-500');
+            confirmButton.classList.add('bg-red-500');
             confirmButton.textContent = 'Confirmar Cancelamento';
         }
     }
+
+    let currentPedidosFilterStatus = 'todos';
 
     function fetchAndRenderPedidos() {
         const requestsList = document.getElementById('requestsList');
@@ -940,11 +950,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
 
                 statusFilter.addEventListener('change', function () {
-                    const selectedStatus = this.value;
-                    renderFilteredPedidos(filteredRequests, selectedStatus);
+                    currentPedidosFilterStatus = this.value;
+                    renderFilteredPedidos(filteredRequests, currentPedidosFilterStatus);
                 });
 
-                renderFilteredPedidos(filteredRequests, 'todos');
+                renderFilteredPedidos(filteredRequests, currentPedidosFilterStatus);
             })
             .catch(error => {
                 console.error('Erro:', error);
@@ -961,11 +971,11 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
             const data = await response.json();
-            currentDateTime = new Date(data.datetime); // Data e hora atual de Brasília
+            currentDateTime = new Date(data.datetime);
         } catch (error) {
             console.error('Erro ao buscar a hora de Brasília:', error);
             alert('Erro ao obter a data e hora atual. Por favor, tente novamente mais tarde.');
-            return; // Parar a execução caso haja erro
+            return;
         }
 
         // Filtrar os pedidos pelo status, exceto se for 'todos'
@@ -977,34 +987,36 @@ document.addEventListener('DOMContentLoaded', function () {
         if (filteredRequests.length === 0) {
             requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhum pedido encontrado.</p>';
         } else {
-            // Ordenar os pedidos com base no status e depois pelo ID
-            filteredRequests.sort((a, b) => {
-                const statusOrder = ['pendente', 'aprovado'];
-                const statusA = statusOrder.indexOf(a.status);
-                const statusB = statusOrder.indexOf(b.status);
+            let isAscending = true;
+            let sortByStatus = true;
 
-                if (statusA !== statusB) {
-                    return statusA - statusB; // Ordenar pela prioridade de status
+            const sortRequests = () => {
+                if (sortByStatus) {
+                    filteredRequests.sort((a, b) => {
+                        const statusOrder = { 'pendente': 1, 'aprovado': 2 };
+                        return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
+                    });
+                } else {
+                    filteredRequests.sort((a, b) => {
+                        return isAscending ? a.id - b.id : b.id - a.id;
+                    });
                 }
+            };
 
-                // Se os status forem iguais, ordenar por ID decrescente
-                return a.id - b.id;
-            });
+            const renderRequests = () => {
+                const requestsHTML = filteredRequests.map(request => {
+                    let actionButtons = '';
 
-            // Gerar o HTML dos pedidos filtrados
-            const requestsHTML = filteredRequests.map(request => {
-                let actionButtons = '';
+                    // Função para verificar se o botão "Cancelar" deve estar invisível
+                    function shouldHideCancel(requestDate, requestTime) {
+                        const requestStartTime = new Date(`${requestDate}T${requestTime}`);
+                        const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60);
+                        return timeDifference < 60;
+                    }
 
-                // Função para verificar se o botão "Cancelar" deve estar invisível
-                function shouldHideCancel(requestDate, requestTime) {
-                    const requestStartTime = new Date(`${requestDate}T${requestTime}`); // Combina data e hora do pedido
-                    const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60); // Diferença em minutos
-                    return timeDifference < 60; // Esconde o botão
-                }
-
-                // Exibir botões de ação dependendo do status
-                if (request.status === 'pendente') {
-                    actionButtons = `
+                    // Exibir botões de ação dependendo do status
+                    if (request.status === 'pendente') {
+                        actionButtons = `
                         <button class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded text-sm approve-request" data-id="${request.id}">
                             Aprovar
                         </button>
@@ -1012,18 +1024,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             Rejeitar
                         </button>
                     `;
-                } else if (request.status === 'aprovado') {
-                    // Verifica se o botão de cancelar deve ser oculto
-                    if (!shouldHideCancel(request.date, request.time)) {
-                        actionButtons = `
+                    } else if (request.status === 'aprovado') {
+                        // Verifica se o botão de cancelar deve ser oculto
+                        if (!shouldHideCancel(request.date, request.time)) {
+                            actionButtons = `
                             <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm cancel-request_ADM" data-id="${request.id}">
                                 Cancelar
                             </button>
                         `;
+                        }
                     }
-                }
 
-                return `
+                    return `
                     <div class="bg-white shadow-md rounded-lg p-4 mb-4">
                         <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
                         <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
@@ -1037,32 +1049,49 @@ document.addEventListener('DOMContentLoaded', function () {
                         ${actionButtons}
                     </div>
                 `;
-            }).join('');
+                }).join('');
 
-            // Renderizar os pedidos na página
-            requestsList.innerHTML = requestsHTML;
+                requestsList.innerHTML = requestsHTML;
 
-            // Adicionar eventos aos botões de aprovação e rejeição
-            document.querySelectorAll('.approve-request').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pedidoId = this.getAttribute('data-id');
-                    showConfirmationModal('aprovar', pedidoId);
+                // Adicionar eventos aos botões de ação
+                document.querySelectorAll('.approve-request').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const pedidoId = this.getAttribute('data-id');
+                        showConfirmationModal('aprovar', pedidoId);
+                    });
                 });
-            });
 
-            document.querySelectorAll('.reject-request').forEach(button => {
-                button.addEventListener('click', function () {
-                    const pedidoId = this.getAttribute('data-id');
-                    showConfirmationModal('rejeitar', pedidoId);
+                document.querySelectorAll('.reject-request').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const pedidoId = this.getAttribute('data-id');
+                        showConfirmationModal('rejeitar', pedidoId);
+                    });
                 });
-            });
 
-            // Adicionar eventos ao botão de cancelar apenas para status 'aprovado'
-            document.querySelectorAll('.cancel-request_ADM').forEach(button => {
-                button.addEventListener('click', function () {
-                    const requestId = this.getAttribute('data-id');
-                    showCancelConfirmation_ADM(requestId);
+                document.querySelectorAll('.cancel-request_ADM').forEach(button => {
+                    button.addEventListener('click', function () {
+                        const requestId = this.getAttribute('data-id');
+                        showCancelConfirmation_ADM(requestId);
+                    });
                 });
+            };
+
+            // Ordenação inicial por status
+            sortRequests();
+            renderRequests();
+
+            // Adiciona a lógica de ordenação por ID
+            document.getElementById('sortByIdButton').addEventListener('click', function () {
+                if (sortByStatus) {
+                    sortByStatus = false;
+                    isAscending = true;
+                } else {
+                    isAscending = !isAscending;
+                }
+                this.textContent = isAscending ? '▲' : '▼';
+
+                sortRequests();
+                renderRequests();
             });
         }
     }
@@ -1089,7 +1118,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const modal_ADM = document.getElementById('cancelConfirmationModal_ADM');
         const confirmButton_ADM = document.getElementById('confirmCancel_ADM');
 
-        // Inicia a animação e altera o texto do botão de confirmação
         confirmButton_ADM.classList.add('animate-pulse');
         confirmButton_ADM.textContent = 'Processando...';
         confirmButton_ADM.classList.remove('bg-red-500');
@@ -1101,26 +1129,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                status: 'cancelado' // Define o status como 'cancelado'
+                status: 'cancelado'
             })
         })
             .then(response => {
-                console.log('Resposta recebida:', response);
                 if (!response.ok) {
                     return response.json().then(errData => {
-                        console.error('Erro no corpo da resposta:', errData);
                         throw new Error(`Erro ${response.status}: ${errData.error || 'Falha ao cancelar a reserva'}`);
                     });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Resposta do servidor:', data);
                 confirmButton_ADM.classList.remove('animate-pulse');
                 confirmButton_ADM.textContent = 'Solicitação Cancelada';
                 confirmButton_ADM.classList.add('bg-red-500');
 
-                // Fecha o modal e atualiza a lista de solicitações após um atraso
                 setTimeout(() => {
                     closeModalAndResetButton_ADM();
                     fetchAndRenderPedidos();
@@ -1132,17 +1156,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButton_ADM.textContent = 'Erro ao Cancelar';
                 confirmButton_ADM.classList.add('bg-red-500');
 
-                // Fecha o modal após um atraso
                 setTimeout(() => {
                     closeModalAndResetButton_ADM();
                 }, 1500);
             });
 
-        // Função para fechar o modal e resetar o botão
         function closeModalAndResetButton_ADM() {
             modal_ADM.classList.add('hidden');
             modal_ADM.classList.remove('flex', 'items-center', 'justify-center');
-            confirmButton_ADM.classList.remove('bg-red-500', 'bg-red-500');
+            confirmButton_ADM.classList.remove('bg-red-500', 'bg-gray-500');
             confirmButton_ADM.classList.add('bg-red-500');
             confirmButton_ADM.textContent = 'Confirmar Cancelamento';
         }
@@ -1185,11 +1207,11 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButton.onclick = () => {
             if (action === 'aprovar') {
                 approvePedido(pedidoId).then(() => {
-                    fetchAndRenderPedidos(); // Chamar a função após a confirmação
+                    fetchAndRenderPedidos();
                 });
             } else {
                 rejectPedido(pedidoId).then(() => {
-                    fetchAndRenderPedidos(); // Chamar a função após a confirmação
+                    fetchAndRenderPedidos();
                 });
             }
             modal.classList.add('hidden');
