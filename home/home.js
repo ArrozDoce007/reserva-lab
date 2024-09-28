@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return [];
 
         try {
-            const response = await fetch(`https://api-reserva-lab.vercel.app/notifications/${userMatricula}`);
+            const response = await fetch(`https://api-reserva-lab.---api---.app/notifications/${userMatricula}`);
             if (!response.ok) throw new Error('Failed to fetch notifications');
             return await response.json();
         } catch (error) {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return;
 
         try {
-            const response = await fetch(`https://api-reserva-lab.vercel.app/notifications/clear/${userMatricula}`, {
+            const response = await fetch(`https://api-reserva-lab.---api---.app/notifications/clear/${userMatricula}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to clear notifications');
@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         async function fetchBrasiliaTime() {
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+                const response = await fetch('https://api-reserva-lab.---api---.app/time/brazilia');
                 const data = await response.json();
                 const currentDateTime = new Date(data.datetime);
 
@@ -639,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Envia os dados para o backend
             try {
-                const response = await fetch("https://api-reserva-lab.vercel.app/reserve", {
+                const response = await fetch("https://api-reserva-lab.---api---.app/reserve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -712,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         requestsList.innerHTML = '<p class="text-center text-gray-500">Carregando solicitações...</p>';
 
-        fetch('https://api-reserva-lab.vercel.app/reserve/status')
+        fetch('https://api-reserva-lab.---api---.app/reserve/status')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Erro ao buscar as solicitações');
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+            const response = await fetch('https://api-reserva-lab.---api---.app/time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -878,7 +878,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButton.classList.remove('bg-red-500');
         confirmButton.classList.add('bg-gray-500');
 
-        fetch(`https://api-reserva-lab.vercel.app/reserve/${requestId}`, {
+        fetch(`https://api-reserva-lab.---api---.app/reserve/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -936,7 +936,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         requestsList.innerHTML = '<p class="text-center text-gray-500">Carregando pedidos...</p>';
 
-        fetch('https://api-reserva-lab.vercel.app/reserve/status/geral')
+        fetch('https://api-reserva-lab.---api---.app/reserve/status/geral')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Erro ao buscar as solicitações');
@@ -969,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+            const response = await fetch('https://api-reserva-lab.---api---.app/time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -1123,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButton_ADM.classList.remove('bg-red-500');
         confirmButton_ADM.classList.add('bg-gray-500');
 
-        fetch(`https://api-reserva-lab.vercel.app/reserve/${requestId}`, {
+        fetch(`https://api-reserva-lab.---api---.app/reserve/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -1225,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function approvePedido(pedidoId) {
-        return fetch(`https://api-reserva-lab.vercel.app/reserve/pedido/${pedidoId}`, {
+        return fetch(`https://api-reserva-lab.---api---.app/reserve/pedido/${pedidoId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -1248,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function rejectPedido(pedidoId) {
-        return fetch(`https://api-reserva-lab.vercel.app/reserve/pedido/${pedidoId}`, {
+        return fetch(`https://api-reserva-lab.---api---.app/reserve/pedido/${pedidoId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -1331,7 +1331,7 @@ function showReservationForm(labName) {
 
 async function fetchUnavailableTimes(labName) {
     try {
-        const response = await fetch(`https://api-reserva-lab.vercel.app/reserve/status/geral`);
+        const response = await fetch(`https://api-reserva-lab.---api---.app/reserve/status/geral`);
         if (!response.ok) {
             throw new Error('Failed to fetch reservations');
         }
