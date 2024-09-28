@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 content = `
                     <h1 class="text-2xl text-white font-bold mb-6">Solicitações de Reserva</h1>
                     <div class="mb-4 centralizar">
-                        <label for="statusFilter" class="block text-white text-sm font-bold mb-2">Filtrar por Status</label>
+                        <label for="statusFilter" class="block text-white text-sm font-bold mb-2">Filtrar e Ordenar</label>
                         <select id="statusFilter" class="p-2 border rounded">
                             <option value="todos">Todos</option>
                             <option value="pendente">Pendente</option>
@@ -203,7 +203,9 @@ document.addEventListener('DOMContentLoaded', function () {
                             <option value="rejeitado">Rejeitado</option>
                             <option value="cancelado">Cancelado</option>
                         </select>
+                        <button id="sortByIdButton" class="text-white bg-blue-500 p-2 rounded focus:outline-none">▲</button>
                     </div>
+
                     <div id="requestsList" class="bg-white rounded-lg shadow p-6">
                         <p class="text-center text-gray-500">Carregando solicitações...</p>
                     </div>
@@ -240,12 +242,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     content = `
                         <h1 class="text-2xl text-white font-bold mb-6">Pedidos de Reserva</h1>
                         <div class="mb-4 centralizar">
-                            <label for="statusFilter" class="block text-white text-sm font-bold mb-2">Filtrar por Status</label>
+                            <label for="statusFilter" class="block text-white text-sm font-bold mb-2">Filtrar e Ordenar</label>
                             <select id="statusFilter" class="p-2 border rounded">
-                                <option value="todos">Todos</option>
-                                <option value="pendente">Pendente</option>
-                                <option value="aprovado">Aprovado</option>
+                                    <option value="todos">Todos</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="aprovado">Aprovado</option>
+                                    <option value="rejeitado">Rejeitado</option>
+                                    <option value="cancelado">Cancelado</option>
                             </select>
+                            <button id="sortByIdButton" class="text-white bg-blue-500 p-2 rounded focus:outline-none">▲</button>
                         </div>
                         <div id="requestsList" class="bg-white rounded-lg shadow p-6">
                             <p class="text-center text-gray-500">Carregando pedidos...</p>
@@ -746,25 +751,29 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Parar a execução caso haja erro
         }
 
+        // Filtra as solicitações com base no status
         if (status !== 'todos') {
             filteredRequests = requests.filter(request => request.status === status);
         }
 
         if (filteredRequests.length === 0) {
             requestsList.innerHTML = '<p class="text-center text-gray-500">Nenhuma solicitação encontrada.</p>';
-        } else {
-            // Ajustando a ordem para que 'pendente' tenha maior prioridade
-            filteredRequests.sort((a, b) => {
-                const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
-                return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
-            });
+            return; // Retorna se não houver solicitações
+        }
 
+        // Ordena as solicitações por status e ID
+        filteredRequests.sort((a, b) => {
+            const statusOrder = { 'pendente': 1, 'aprovado': 2, 'rejeitado': 3, 'cancelado': 4 };
+            return statusOrder[a.status] - statusOrder[b.status] || a.id - b.id;
+        });
+
+        // Função para renderizar as solicitações
+        const renderRequests = () => {
             const requestsHTML = filteredRequests.map(request => {
-                // Função para verificar se o botão "Cancelar" deve estar invisível
                 function shouldHideCancel(requestDate, requestTime, requestStatus) {
-                    const requestStartTime = new Date(`${requestDate}T${requestTime}`); // Combina data e hora do pedido
-                    const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60); // Diferença em minutos
-                    return requestStatus === 'aprovado' && timeDifference <= 60; // Só esconder se status for 'aprovado' e faltar 1h ou menos
+                    const requestStartTime = new Date(`${requestDate}T${requestTime}`);
+                    const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60);
+                    return requestStatus === 'aprovado' && timeDifference <= 60;
                 }
 
                 return `
@@ -785,13 +794,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
             requestsList.innerHTML = requestsHTML;
 
+            // Adiciona os eventos aos botões de cancelar
             document.querySelectorAll('.cancel-request').forEach(button => {
                 button.addEventListener('click', function () {
                     const requestId = this.getAttribute('data-id');
                     showCancelConfirmation(requestId);
                 });
             });
-        }
+        };
+
+        renderRequests(); // Renderiza as solicitações inicialmente
+
+        let isAscending = true;
+        document.getElementById('sortByIdButton').addEventListener('click', function () {
+            isAscending = !isAscending;
+            this.textContent = isAscending ? '▲' : '▼';
+
+            // Ordena as solicitações por ID
+            filteredRequests.sort((a, b) => {
+                return isAscending ? a.id - b.id : b.id - a.id;
+            });
+
+            renderRequests(); // Renderiza novamente após a ordenação
+        });
     }
 
     function formatDate(dateString) {
