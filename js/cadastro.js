@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         try {
-            const response = await fetch('https://api-reserva-lab.vercel.app/cadastro', {
+            const response = await fetch('https://cadastro', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
