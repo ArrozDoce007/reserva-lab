@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Envia a requisição para a API
     try {
-      const response = await fetch('https://api-reserva-lab.vercel.app/login', {
+      const response = await fetch('https://login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
