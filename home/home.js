@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return [];
 
         try {
-            const response = await fetch(`https://api-reserva-lab.vercel.app/notifications/${userMatricula}`);
+            const response = await fetch(` /notifications/${userMatricula}`);
             if (!response.ok) throw new Error('Failed to fetch notifications');
             return await response.json();
         } catch (error) {
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return;
 
         try {
-            const response = await fetch(`https://api-reserva-lab.vercel.app/notifications/clear/${userMatricula}`, {
+            const response = await fetch(` /notifications/clear/${userMatricula}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to clear notifications');
@@ -1068,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const token = localStorage.getItem('authToken');  // Obtém o token JWT
 
                                 try {
-                                    const response = await fetch('https://api-reserva-lab.vercel.app/laboratorios/criar', {
+                                    const response = await fetch(' /laboratorios/criar', {
                                         method: 'POST',
                                         body: formData,
                                         headers: {
@@ -1244,7 +1244,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');
 
             // Faz a requisição com o token JWT no cabeçalho Authorization
-            fetch('https://api-reserva-lab.vercel.app/usuarios', {
+            fetch(' /usuarios', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1364,7 +1364,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(`https://api-reserva-lab.vercel.app/usuarios/aprovar/${userId}`, {
+                            const response = await fetch(` /usuarios/aprovar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(`https://api-reserva-lab.vercel.app/usuarios/atualizar/${userId}`, {
+                            const response = await fetch(` /usuarios/atualizar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1512,7 +1512,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(`https://api-reserva-lab.vercel.app/usuarios/atualizar/${userId}`, {
+                            const response = await fetch(` /usuarios/atualizar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1611,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         try {
                             // Faz a requisição DELETE para deletar o usuário com o token no cabeçalho
-                            const response = await fetch(`https://api-reserva-lab.vercel.app/usuarios/deletar/${userId}`, {
+                            const response = await fetch(` /usuarios/deletar/${userId}`, {
                                 method: 'DELETE',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1672,7 +1672,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labNameFilter.innerHTML = '<option value="todos">Todos</option>'; // Limpa e adiciona a opção padrão
 
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/laboratorios', {
+                const response = await fetch(' /laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Adiciona o token de autenticação
@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');
 
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/laboratorios', {
+                const response = await fetch(' /laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1796,7 +1796,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 // Faz a requisição para buscar laboratórios com o token no cabeçalho
-                const response = await fetch('https://api-reserva-lab.vercel.app/laboratorios', {
+                const response = await fetch(' /laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1910,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');  // Obtém o token JWT
 
             try {
-                const response = await fetch(`https://api-reserva-lab.vercel.app/laboratorios/editar/${lab.id}`, {
+                const response = await fetch(` /laboratorios/editar/${lab.id}`, {
                     method: 'PUT',
                     body: updatedLabData, // Enviando FormData
                     headers: {
@@ -1949,7 +1949,7 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmButton.disabled = true;
 
             try {
-                const response = await fetch(`https://api-reserva-lab.vercel.app/laboratorios/deletar/${labId}`, {
+                const response = await fetch(` /laboratorios/deletar/${labId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}` // Adiciona o token JWT no cabeçalho
@@ -2004,7 +2004,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         async function fetchBrasiliaTime() {
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+                const response = await fetch(' /time/brazilia');
                 const data = await response.json();
                 const currentDateTime = new Date(data.datetime);
 
@@ -2262,7 +2262,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         async function sendReservationData(data, token) {
             try {
-                const response = await fetch("https://api-reserva-lab.vercel.app/reserve", {
+                const response = await fetch(" /reserve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -2330,7 +2330,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestsList.innerHTML = '<p class="text-center text-white">Carregando solicitações...</p>';
 
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/reserve/status', {
+                const response = await fetch(' /reserve/status', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -2377,7 +2377,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+            const response = await fetch(' /time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -2432,7 +2432,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     let motivoRejeicao = '';
                     if (request.status === 'rejeitado') {
                         try {
-                            const response = await fetch(`https://api-reserva-lab.vercel.app/rejeicoes/${request.id}`);
+                            const response = await fetch(` /rejeicoes/${request.id}`);
                             if (response.ok) {
                                 const data = await response.json();
                                 motivoRejeicao = data.motivo;
@@ -2593,7 +2593,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Impede que o cancelamento continue sem autenticação
         }
 
-        fetch(`https://api-reserva-lab.vercel.app/reserve/cancelar/${requestId}`, {
+        fetch(` /reserve/cancelar/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -2659,7 +2659,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestsList.innerHTML = '<p class="text-center text-white">Carregando pedidos...</p>';
 
             try {
-                const response = await fetch('https://api-reserva-lab.vercel.app/reserve/status/geral', {
+                const response = await fetch(' /reserve/status/geral', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -2709,7 +2709,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+            const response = await fetch(' /time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -2902,7 +2902,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Impede o cancelamento caso o usuário não esteja autenticado
         }
 
-        fetch(`https://api-reserva-lab.vercel.app/reserve/cancelar/${requestId}`, {
+        fetch(` /reserve/cancelar/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -3025,7 +3025,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        return fetch(`https://api-reserva-lab.vercel.app/aprovar/pedido/${pedidoId}`, {
+        return fetch(` /aprovar/pedido/${pedidoId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -3056,7 +3056,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        return fetch(`https://api-reserva-lab.vercel.app/rejeitar/pedido/${pedidoId}`, {
+        return fetch(` /rejeitar/pedido/${pedidoId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -3140,7 +3140,7 @@ async function fetchUnavailableTimes(labName) {
     const token = localStorage.getItem('authToken');
 
     try {
-        const response = await fetch(`https://api-reserva-lab.vercel.app/reserve/status/geral`, {
+        const response = await fetch(` /reserve/status/geral`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -3165,7 +3165,7 @@ async function fetchUnavailableTimes(labName) {
 
 async function fetchCurrentTime() {
     try {
-        const response = await fetch('https://api-reserva-lab.vercel.app/time/brazilia');
+        const response = await fetch(' /time/brazilia');
         if (!response.ok) {
             throw new Error('Failed to fetch current time');
         }
