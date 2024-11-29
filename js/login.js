@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Envia a requisição para a API
     try {
-      const response = await fetch('https://login', {
+      const response = await fetch('/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (error) {
       console.error('Erro ao tentar fazer login:', error);
-      showModal('Ocorreu um erro. Tente novamente.');
+      showModal('Ocorreu um erro, Tente novamente.');
     } finally {
       // Oculta o spinner e retorna ao texto original do botão
       buttonText.classList.remove('hidden');

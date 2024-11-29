@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         try {
-            const response = await fetch('https://cadastro', {
+            const response = await fetch('/cadastro', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

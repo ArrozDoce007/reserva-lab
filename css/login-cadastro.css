@@ -212,6 +212,11 @@ h6 span {
     margin-top: -150px;
 }
 
+.checkbox:checked~.card-3d-wrap {
+    height: 1020px;
+    /* Ajuste a altura para o tamanho do formulário maior */
+}
+
 .card-3d-wrapper {
     width: 100%;
     height: 100%;

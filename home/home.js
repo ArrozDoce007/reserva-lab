@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return [];
 
         try {
-            const response = await fetch(` /notifications/${userMatricula}`);
+            const response = await fetch(`/notifications/${userMatricula}`);
             if (!response.ok) throw new Error('Failed to fetch notifications');
             return await response.json();
         } catch (error) {
@@ -507,7 +507,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!userMatricula) return;
 
         try {
-            const response = await fetch(` /notifications/clear/${userMatricula}`, {
+            const response = await fetch(`/notifications/clear/${userMatricula}`, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Failed to clear notifications');
@@ -1068,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 const token = localStorage.getItem('authToken');  // Obtém o token JWT
 
                                 try {
-                                    const response = await fetch(' /laboratorios/criar', {
+                                    const response = await fetch('/laboratorios/criar', {
                                         method: 'POST',
                                         body: formData,
                                         headers: {
@@ -1244,7 +1244,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');
 
             // Faz a requisição com o token JWT no cabeçalho Authorization
-            fetch(' /usuarios', {
+            fetch('/usuarios', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1364,7 +1364,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(` /usuarios/aprovar/${userId}`, {
+                            const response = await fetch(`/usuarios/aprovar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(` /usuarios/atualizar/${userId}`, {
+                            const response = await fetch(`/usuarios/atualizar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1512,7 +1512,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         try {
-                            const response = await fetch(` /usuarios/atualizar/${userId}`, {
+                            const response = await fetch(`/usuarios/atualizar/${userId}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1611,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         try {
                             // Faz a requisição DELETE para deletar o usuário com o token no cabeçalho
-                            const response = await fetch(` /usuarios/deletar/${userId}`, {
+                            const response = await fetch(`/usuarios/deletar/${userId}`, {
                                 method: 'DELETE',
                                 headers: {
                                     'Authorization': `Bearer ${token}`, // Adiciona o token JWT no cabeçalho
@@ -1672,7 +1672,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labNameFilter.innerHTML = '<option value="todos">Todos</option>'; // Limpa e adiciona a opção padrão
 
             try {
-                const response = await fetch(' /laboratorios', {
+                const response = await fetch('/laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Adiciona o token de autenticação
@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');
 
             try {
-                const response = await fetch(' /laboratorios', {
+                const response = await fetch('/laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1796,7 +1796,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 // Faz a requisição para buscar laboratórios com o token no cabeçalho
-                const response = await fetch(' /laboratorios', {
+                const response = await fetch('/laboratorios', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -1910,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const token = localStorage.getItem('authToken');  // Obtém o token JWT
 
             try {
-                const response = await fetch(` /laboratorios/editar/${lab.id}`, {
+                const response = await fetch(`/laboratorios/editar/${lab.id}`, {
                     method: 'PUT',
                     body: updatedLabData, // Enviando FormData
                     headers: {
@@ -1949,7 +1949,7 @@ document.addEventListener('DOMContentLoaded', function () {
             confirmButton.disabled = true;
 
             try {
-                const response = await fetch(` /laboratorios/deletar/${labId}`, {
+                const response = await fetch(`/laboratorios/deletar/${labId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}` // Adiciona o token JWT no cabeçalho
@@ -2004,7 +2004,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         async function fetchBrasiliaTime() {
             try {
-                const response = await fetch(' /time/brazilia');
+                const response = await fetch('/time/brazilia');
                 const data = await response.json();
                 const currentDateTime = new Date(data.datetime);
 
@@ -2027,7 +2027,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateDate();
                 });
 
-                timeInput.value = `${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}`;
+                // Calcula o horário mínimo (1 hora após o horário atual, com minutos zerados)
+                const minHour = (currentHour + 1) % 24;
+
+                timeInput.value = `${minHour.toString().padStart(2, '0')}:00`;
                 timeFimInput.value = '';
 
                 dateInput.addEventListener('change', updateDate);
@@ -2057,18 +2060,27 @@ document.addEventListener('DOMContentLoaded', function () {
             const formattedYesterday = yesterday.toISOString().split('T')[0];
 
             if (selectedDate === currentDate) {
-                // Para a data atual, permitir qualquer horário
-                timeInput.min = '07:00';
-                timeFimInput.min = '07:00';
+                // Para a data atual, permitir horários apenas 1 hora após o horário atual
+                const currentHour = now.getHours();
+                const minHour = (currentHour + 1) % 24;
+                const minTimeString = `${minHour.toString().padStart(2, '0')}:00`;
+
+                timeInput.min = minTimeString;
+                timeFimInput.min = minTimeString;
                 timeInput.disabled = false;
                 timeFimInput.disabled = false;
-                reserveButton.disabled = false
+                reserveButton.disabled = false;
+
+                // Ajusta o horário selecionado se for menor que o mínimo permitido
+                if (timeInput.value < minTimeString) {
+                    timeInput.value = minTimeString;
+                }
             } else if (selectedDate === formattedYesterday) {
                 if (now.getHours() >= 21) {
                     // Após 21:00, bloqueia os campos de horário para ontem
                     timeInput.disabled = true;
                     timeFimInput.disabled = true;
-                    reserveButton.disabled = true
+                    reserveButton.disabled = true;
                     timeInput.value = '';
                     timeFimInput.value = '';
                     if (userInteracted) {
@@ -2080,7 +2092,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     timeFimInput.min = '07:00';
                     timeInput.disabled = false;
                     timeFimInput.disabled = false;
-                    reserveButton.disabled = false
+                    reserveButton.disabled = false;
                 }
             } else {
                 // Para outras datas (futuras ou passadas, exceto ontem), habilita os campos
@@ -2088,7 +2100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 timeFimInput.min = '07:00';
                 timeInput.disabled = false;
                 timeFimInput.disabled = false;
-                reserveButton.disabled = false
+                reserveButton.disabled = false;
             }
 
             updateTimeFimMin();
@@ -2162,6 +2174,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (startTime > maxTime && selectedDate !== formattedYesterday) {
                 showModal('O horário de início não pode ser após 21:00.');
                 timeInput.value = maxTime;
+            }
+
+            // Para o dia atual, verifica se o horário selecionado é pelo menos 1 hora após o horário atual
+            if (selectedDate === now.toISOString().split('T')[0]) {
+                const currentHour = now.getHours();
+                const minHour = (currentHour + 1) % 24;
+                const minTimeString = `${minHour.toString().padStart(2, '0')}:00`;
+
+                if (startTime < minTimeString) {
+                    showModal(`O horário de início deve ser pelo menos ${minTimeString} para hoje.`);
+                    timeInput.value = minTimeString;
+                }
             }
 
             updateTimeFimMin();
@@ -2262,7 +2286,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         async function sendReservationData(data, token) {
             try {
-                const response = await fetch(" /reserve", {
+                const response = await fetch("/reserve", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -2330,7 +2354,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestsList.innerHTML = '<p class="text-center text-white">Carregando solicitações...</p>';
 
             try {
-                const response = await fetch(' /reserve/status', {
+                const response = await fetch('/reserve/status', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -2377,7 +2401,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch(' /time/brazilia');
+            const response = await fetch('/time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -2432,7 +2456,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     let motivoRejeicao = '';
                     if (request.status === 'rejeitado') {
                         try {
-                            const response = await fetch(` /rejeicoes/${request.id}`);
+                            const response = await fetch(`/rejeicoes/${request.id}`);
                             if (response.ok) {
                                 const data = await response.json();
                                 motivoRejeicao = data.motivo;
@@ -2593,7 +2617,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Impede que o cancelamento continue sem autenticação
         }
 
-        fetch(` /reserve/cancelar/${requestId}`, {
+        fetch(`/reserve/cancelar/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -2659,7 +2683,7 @@ document.addEventListener('DOMContentLoaded', function () {
             requestsList.innerHTML = '<p class="text-center text-white">Carregando pedidos...</p>';
 
             try {
-                const response = await fetch(' /reserve/status/geral', {
+                const response = await fetch('/reserve/status/geral', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`, // Envia o token JWT no cabeçalho
@@ -2709,7 +2733,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obter a hora atual de Brasília
         let currentDateTime;
         try {
-            const response = await fetch(' /time/brazilia');
+            const response = await fetch('/time/brazilia');
             const data = await response.json();
             currentDateTime = new Date(data.datetime);
         } catch (error) {
@@ -2753,81 +2777,96 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
 
-            const renderRequests = () => {
-                const requestsHTML = filteredRequests.map(request => {
-                    let actionButtons = '';
+            const renderRequests = async () => {
+                const requestsHTML = await Promise.all(
+                    filteredRequests.map(async (request) => {
+                        let motivoRejeicao = '';
 
-                    // Função para verificar se o botão "Cancelar" deve estar invisível
-                    function shouldHideCancel(requestDate, requestTime) {
-                        const requestStartTime = new Date(`${requestDate}T${requestTime}`);
-                        const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60);
-                        return timeDifference <= 0;
-                    }
-
-                    // Exibir botões de ação dependendo do status
-                    if (request.status === 'pendente') {
-                        actionButtons = `
-                        <button class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 bordas-redondas text-sm approve-request" data-id="${request.id}">
-                            Aprovar
-                        </button>
-                        <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 bordas-redondas text-sm reject-request" data-id="${request.id}">
-                            Rejeitar
-                        </button>
-                    `;
-                    } else if (request.status === 'aprovado') {
-                        // Verifica se o botão de cancelar deve ser oculto
-                        if (!shouldHideCancel(request.date, request.time)) {
-                            actionButtons = `
-                            <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 bordas-redondas text-sm cancel-request_Administrador" data-id="${request.id}">
-                                Cancelar
-                            </button>
-                        `;
+                        // Buscar o motivo da rejeição se o status for "rejeitado"
+                        if (request.status === 'rejeitado') {
+                            try {
+                                const response = await fetch(`/rejeicoes/${request.id}`);
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    motivoRejeicao = data.motivo || 'Motivo não informado';
+                                }
+                            } catch (error) {
+                                console.error(`Erro ao buscar o motivo de rejeição: ${error}`);
+                            }
                         }
-                    }
 
-                    const softwareEspecificoHtml = request.software_nome !== null ?
-                        `<p class="text-sm text-gray-600">Software específico: ${request.software_nome}</p>` : '';
+                        // Função para verificar se o botão "Cancelar" deve estar invisível
+                        function shouldHideCancel(requestDate, requestTime) {
+                            const requestStartTime = new Date(`${requestDate}T${requestTime}`);
+                            const timeDifference = (requestStartTime - currentDateTime) / (1000 * 60);
+                            return timeDifference <= 0;
+                        }
 
-                    return `
-                    <div class="bg-white shadow-md bordas-redondas p-4 mb-4">
-                        <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
-                        <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
-                        <p class="text-sm text-gray-600">Solicitante: ${request.nome}</p>
-                        <p class="text-sm text-gray-600">Matrícula: ${request.matricula}</p>
-                        <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
-                        <p class="text-sm text-gray-600">Horário de Início: ${request.time}</p>
-                        <p class="text-sm text-gray-600">Horário de Término: ${request.time_fim}</p>
-                        ${softwareEspecificoHtml}
-                        <div class="max-w">
-                            <p class="text-sm text-gray-600">
-                                <span class="font-semibold">Finalidade:</span> 
-                                <span class="break-normal">${request.purpose}</span>
-                            </p>
-                        </div>
-                        <h4 class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</h4>
-                        ${actionButtons}
-                    </div>
-                `;
-                }).join('');
+                        // Exibir botões de ação dependendo do status
+                        let actionButtons = '';
+                        if (request.status === 'pendente') {
+                            actionButtons = `
+                            <button class="mt-2 bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 bordas-redondas text-sm approve-request" data-id="${request.id}">
+                                Aprovar
+                            </button>
+                            <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 bordas-redondas text-sm reject-request" data-id="${request.id}">
+                                Rejeitar
+                            </button>`;
+                        } else if (request.status === 'aprovado') {
+                            if (!shouldHideCancel(request.date, request.time)) {
+                                actionButtons = `
+                                <button class="mt-2 bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 bordas-redondas text-sm cancel-request_Administrador" data-id="${request.id}">
+                                    Cancelar
+                                </button>`;
+                            }
+                        }
 
-                requestsList.innerHTML = requestsHTML;
+                        const softwareEspecificoHtml = request.software_nome
+                            ? `<p class="text-sm text-gray-600">Software específico: ${request.software_nome}</p>`
+                            : '';
+
+                        // Retorna o HTML da solicitação
+                        return `
+                        <div class="bg-white shadow-md bordas-redondas p-4 mb-4">
+                            <h3 class="font-bold text-lg mb-2">${request.lab_name}</h3>
+                            <p class="text-sm text-gray-600">Solicitação: ${request.id}</p>
+                            <p class="text-sm text-gray-600">Solicitante: ${request.nome}</p>
+                            <p class="text-sm text-gray-600">Matrícula: ${request.matricula}</p>
+                            <p class="text-sm text-gray-600">Data: ${formatDate(request.date)}</p>
+                            <p class="text-sm text-gray-600">Horário de Início: ${request.time}</p>
+                            <p class="text-sm text-gray-600">Horário de Término: ${request.time_fim}</p>
+                            ${softwareEspecificoHtml}
+                            <div class="max-w">
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold">Finalidade:</span> 
+                                    <span class="break-normal">${request.purpose}</span>
+                                </p>
+                            </div>
+                            <h4 class="text-sm font-semibold mt-2 ${getStatusColor(request.status)}">${request.status}</h4>
+                            ${request.status === 'rejeitado' ? `<h4 class="text-sm text-red-600">Motivo da rejeição: ${motivoRejeicao}</h4>` : ''}
+                            ${actionButtons}
+                        </div>`;
+                    })
+                );
+
+                requestsList.innerHTML = requestsHTML.join('');
 
                 // Adicionar eventos aos botões de ação
-                document.querySelectorAll('.approve-request').forEach(button => {
+                document.querySelectorAll('.approve-request').forEach((button) => {
                     button.addEventListener('click', function () {
                         const pedidoId = this.getAttribute('data-id');
                         showConfirmationModal('aprovar', pedidoId);
                     });
                 });
 
-                document.querySelectorAll('.reject-request').forEach(button => {
+                document.querySelectorAll('.reject-request').forEach((button) => {
                     button.addEventListener('click', function () {
                         const pedidoId = this.getAttribute('data-id');
                         showConfirmationModal('rejeitar', pedidoId);
                     });
                 });
 
-                document.querySelectorAll('.cancel-request_Administrador').forEach(button => {
+                document.querySelectorAll('.cancel-request_Administrador').forEach((button) => {
                     button.addEventListener('click', function () {
                         const requestId = this.getAttribute('data-id');
                         showCancelConfirmation_Administrador(requestId);
@@ -2902,7 +2941,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return; // Impede o cancelamento caso o usuário não esteja autenticado
         }
 
-        fetch(` /reserve/cancelar/${requestId}`, {
+        fetch(`/reserve/cancelar/${requestId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -2995,19 +3034,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
         confirmButton.onclick = () => {
             if (action === 'aprovar') {
-                approvePedido(pedidoId).then(() => {
-                    showAnimatedConfirmation2('aprovar', pedidoId);
-                });
+                approvePedido(pedidoId)
+                    .then(() => {
+                        // Apenas chama a animação em caso de sucesso
+                        showAnimatedConfirmation2('aprovar', pedidoId);
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showModal('Não foi possível aprovar o pedido.');
+                    });
             } else {
                 const rejectReason = document.getElementById('rejectReason').value.trim();
                 if (!rejectReason) {
                     showModal('Por favor, forneça um motivo para a rejeição.');
                     return;
                 }
-                rejectPedido(pedidoId, rejectReason).then(() => {
-                    showAnimatedConfirmation2('rejeitar', pedidoId);
-                });
+                rejectPedido(pedidoId, rejectReason)
+                    .then(() => {
+                        // Apenas chama a animação em caso de sucesso
+                        showAnimatedConfirmation2('rejeitar', pedidoId);
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        showModal('Não foi possível rejeitar o pedido.');
+                    });
             }
+
             modal.classList.add('hidden');
             modal.classList.remove('flex', 'items-center', 'justify-center');
         };
@@ -3022,10 +3074,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = localStorage.getItem('authToken'); // Recupera o token JWT
         if (!token) {
             showModal('Você não está autenticado. Faça login para continuar.');
-            return;
+            return Promise.reject(new Error('Usuário não autenticado'));
         }
 
-        return fetch(` /aprovar/pedido/${pedidoId}`, {
+        return fetch(`/aprovar/pedido/${pedidoId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -3035,17 +3087,11 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Erro ao aprovar o pedido');
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Erro ao aprovar o pedido');
+                    });
                 }
                 return response.json();
-            })
-            .then(async _data => {
-                console.log(`Pedido ${pedidoId} aprovado!`);
-                addNotification(`Pedido ${pedidoId} foi aprovado.`);
-                await updateNotifications(); // Atualiza as notificações imediatamente
-            })
-            .catch(error => {
-                console.error('Erro:', error);
             });
     }
 
@@ -3053,10 +3099,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = localStorage.getItem('authToken'); // Recupera o token JWT
         if (!token) {
             showModal('Você não está autenticado. Faça login para continuar.');
-            return;
+            return Promise.reject(new Error('Usuário não autenticado'));
         }
 
-        return fetch(` /rejeitar/pedido/${pedidoId}`, {
+        return fetch(`/rejeitar/pedido/${pedidoId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -3066,16 +3112,14 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Erro ao processar a rejeição');
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Erro ao processar a rejeição');
+                    });
                 }
-                console.log(`Pedido ${pedidoId} rejeitado com motivo: ${rejectReason}!`);
-                addNotification(`Pedido ${pedidoId} foi rejeitado.`);
-                return updateNotifications();
-            })
-            .catch(error => {
-                console.error('Erro:', error);
+                return response.json();
             });
     }
+
 
     navMenu.addEventListener('click', function (e) {
         if (e.target.tagName === 'BUTTON') {
@@ -3140,7 +3184,7 @@ async function fetchUnavailableTimes(labName) {
     const token = localStorage.getItem('authToken');
 
     try {
-        const response = await fetch(` /reserve/status/geral`, {
+        const response = await fetch(`/reserve/status/geral`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -3165,7 +3209,7 @@ async function fetchUnavailableTimes(labName) {
 
 async function fetchCurrentTime() {
     try {
-        const response = await fetch(' /time/brazilia');
+        const response = await fetch('/time/brazilia');
         if (!response.ok) {
             throw new Error('Failed to fetch current time');
         }
@@ -3209,44 +3253,44 @@ function renderFixedTimeTable(expandedReservations, selectedDate, currentDateTim
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 ${timeSlots.map((slot, index) => {
-                    // Se for o dia de hoje, só exibe os horários que são no futuro
-                    if (isToday) {
-                        const slotStartHour = parseInt(slot.start.split(':')[0]);
-                        if (slotStartHour < currentHour + 1) {
-                            return ''; // Não exibe horários passados
-                        }
-                    }
+        // Se for o dia de hoje, só exibe os horários que são no futuro
+        if (isToday) {
+            const slotStartHour = parseInt(slot.start.split(':')[0]);
+            if (slotStartHour < currentHour + 1) {
+                return ''; // Não exibe horários passados
+            }
+        }
 
-                    let statusText = 'Disponível';
-                    let statusClass = 'text-green-600 bg-green-200';
+        let statusText = 'Disponível';
+        let statusClass = 'text-green-600 bg-green-200';
 
-                    const reservation = expandedReservations.find(res =>
-                        res.date === selectedDate &&
-                        res.start === slot.start &&
-                        res.end === slot.end
-                    );
+        const reservation = expandedReservations.find(res =>
+            res.date === selectedDate &&
+            res.start === slot.start &&
+            res.end === slot.end
+        );
 
-                    if (reservation) {
-                        if (reservation.status === 'pendente') {
-                            statusText = 'Pendente de Aprovação';
-                            statusClass = 'text-yellow-600 bg-yellow-200';
-                        } else if (reservation.status === 'aprovado') {
-                            statusText = 'Reservado';
-                            statusClass = 'text-red-600 bg-red-200';
-                        } else if (reservation.status === 'utilizando') {
-                            statusText = 'Em Uso';
-                            statusClass = 'text-blue-600 bg-blue-200';
-                        }
-                    }
+        if (reservation) {
+            if (reservation.status === 'pendente') {
+                statusText = 'Pendente de Aprovação';
+                statusClass = 'text-yellow-600 bg-yellow-200';
+            } else if (reservation.status === 'aprovado') {
+                statusText = 'Reservado';
+                statusClass = 'text-red-600 bg-red-200';
+            } else if (reservation.status === 'utilizando') {
+                statusText = 'Em Uso';
+                statusClass = 'text-blue-600 bg-blue-200';
+            }
+        }
 
-                    return `
+        return `
                         <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${slot.start}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${slot.end}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm ${statusClass}">${statusText}</td>
                         </tr>
                     `;
-                }).join('')}
+    }).join('')}
             </tbody>
         </table>
     `;
