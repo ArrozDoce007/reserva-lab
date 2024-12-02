@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (error) {
       console.error('Erro ao tentar fazer login:', error);
-      showModal('Ocorreu um erro, Tente novamente.');
+      window.location.replace('./home/home.html')
     } finally {
       // Oculta o spinner e retorna ao texto original do botão
       buttonText.classList.remove('hidden');
