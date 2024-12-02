@@ -4,29 +4,6 @@ let colorbg = new Color4Bg.ChaosWavesBg({
     loop: true
 })
 
-document.addEventListener('DOMContentLoaded', function () {
-    function checkAuth() {
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-        const userName = localStorage.getItem('userName');
-        const userMatricula = localStorage.getItem('userMatricula');
-        const token = localStorage.getItem('authToken');
-
-        if (!isLoggedIn || !userName || !userMatricula || !token) {
-            // Usuário não está autenticado, redireciona para a página de login
-            window.location.replace('../index.html');
-        }
-    }
-
-    // Chama a verificação de autenticação
-    checkAuth();
-
-    // Previne o uso do botão voltar após o logout
-    window.history.pushState(null, '', window.location.href);
-    window.onpopstate = function () {
-        window.history.pushState(null, '', window.location.href);
-    };
-
-
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
     const profileButton = document.getElementById('profile-button');
