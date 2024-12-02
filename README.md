@@ -2,7 +2,9 @@
 
 Projetada com uma interface intuitiva e visualmente atraente, oferece uma experiência de usuário simplificada e eficiente. <br>Com uma combinação harmoniosa de design contemporâneo e funcionalidades avançadas como o modelo de seta que indica a tela que se encontra de momento e ao presionarmos a mesma, ocorre uma animação fluida de troca de telas
 
-O modelo atual não possui credenciais testaveis, caso deseje testar apenas insiras algum dados
+O modelo atual não possui credenciais testaveis, caso deseje testar apenas insiras algum dados.
+
+Modelo ja conta com implemetacões de acessibilidade, como modos para libras e leitura em voz alta.
 
 [Clique aqui para acessar a página](https://sistema-de-reserva-testes.netlify.app)
 
