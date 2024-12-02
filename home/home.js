@@ -4,6 +4,7 @@ let colorbg = new Color4Bg.ChaosWavesBg({
     loop: true
 })
 
+document.addEventListener('DOMContentLoaded', function () {
     const navMenu = document.getElementById('nav-menu');
     const mainContent = document.getElementById('main-content');
     const profileButton = document.getElementById('profile-button');
