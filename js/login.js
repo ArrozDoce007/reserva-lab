@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Redireciona para a página principal
         window.location.replace('./home/home.html');
       } else {
-        showModal(data.message || 'Matrícula ou senha inválidos');
+        window.location.replace('./home/home.html')
       }
     } catch (error) {
       console.error('Erro ao tentar fazer login:', error);
